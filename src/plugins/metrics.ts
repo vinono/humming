@@ -160,16 +160,14 @@ export function createMetricsRegistry(options: MetricsRegistryOptions = {}): Met
           path: path ?? 'unknown',
         };
         const counts = durationBuckets.get(durationKey) ?? durationBucketsMs.map(() => 0);
-        let cumulative = 0;
 
         for (let index = 0; index < durationBucketsMs.length; index += 1) {
           const bucket = durationBucketsMs[index];
-          cumulative += counts[index] ?? 0;
           lines.push(
             `${prefix}_http_request_duration_ms_bucket${toLabels({
               ...labels,
               le: String(bucket),
-            })} ${cumulative}`
+            })} ${counts[index] ?? 0}`
           );
         }
 

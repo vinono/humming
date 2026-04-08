@@ -795,6 +795,27 @@ describe('official plugins', () => {
     expect(output).not.toContain('path="/hello"');
   });
 
+  it('metrics registry renders cumulative histogram buckets without double accumulation', async () => {
+    const registry = createMetricsRegistry({
+      prefix: 'test',
+      durationBucketsMs: [10, 20],
+    });
+
+    await registry.observe({
+      method: 'GET',
+      path: '/timed',
+      status: 200,
+      durationMs: 15,
+    });
+
+    const output = await registry.render();
+
+    expect(output).toContain('test_http_request_duration_ms_bucket{method="GET",path="/timed",le="10"} 0');
+    expect(output).toContain('test_http_request_duration_ms_bucket{method="GET",path="/timed",le="20"} 1');
+    expect(output).toContain('test_http_request_duration_ms_bucket{method="GET",path="/timed",le="+Inf"} 1');
+    expect(output).not.toContain('test_http_request_duration_ms_bucket{method="GET",path="/timed",le="20"} 2');
+  });
+
   it('options static plugin registers the static source into an empty registry', async () => {
     const options = createOptionsService({
       configJson: JSON.stringify({

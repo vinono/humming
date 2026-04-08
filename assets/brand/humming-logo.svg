@@ -4,9 +4,23 @@
       <stop stop-color="#10244A"/>
       <stop offset="1" stop-color="#0A1531"/>
     </linearGradient>
+    <linearGradient id="panel-stroke" x1="58" y1="42" x2="300" y2="298" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#365E9D" stop-opacity="0.85"/>
+      <stop offset="0.45" stop-color="#1D3568" stop-opacity="0.78"/>
+      <stop offset="1" stop-color="#6EE6FF" stop-opacity="0.34"/>
+    </linearGradient>
+    <linearGradient id="panel-highlight" x1="78" y1="54" x2="264" y2="198" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D7F7FF" stop-opacity="0.22"/>
+      <stop offset="0.55" stop-color="#79E9FF" stop-opacity="0.07"/>
+      <stop offset="1" stop-color="#79E9FF" stop-opacity="0"/>
+    </linearGradient>
     <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(182 152) rotate(90) scale(128)">
       <stop stop-color="#8BF6FF" stop-opacity="0.50"/>
       <stop offset="1" stop-color="#8BF6FF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="plugin-node-glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(248 109) rotate(90) scale(32)">
+      <stop stop-color="#FF9B74" stop-opacity="0.65"/>
+      <stop offset="1" stop-color="#FF9B74" stop-opacity="0"/>
     </radialGradient>
     <linearGradient id="rail" x1="96" y1="116" x2="262" y2="236" gradientUnits="userSpaceOnUse">
       <stop stop-color="#7FE2FF"/>
@@ -25,12 +39,25 @@
       <stop offset="0.5" stop-color="#1F4C95"/>
       <stop offset="1" stop-color="#1385C0"/>
     </linearGradient>
+    <linearGradient id="tagline" x1="374" y1="132" x2="928" y2="194" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5778A5"/>
+      <stop offset="1" stop-color="#34639A"/>
+    </linearGradient>
     <filter id="panel-shadow" x="24" y="18" width="316" height="316" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
       <feFlood flood-opacity="0" result="BackgroundImageFix"/>
       <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
       <feOffset dy="8"/>
       <feGaussianBlur stdDeviation="9"/>
       <feColorMatrix type="matrix" values="0 0 0 0 0.02 0 0 0 0 0.05 0 0 0 0 0.12 0 0 0 0.30 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1_1"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1_1" result="shape"/>
+    </filter>
+    <filter id="word-shadow" x="356" y="46" width="648" height="144" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="3"/>
+      <feGaussianBlur stdDeviation="3"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.06 0 0 0 0 0.15 0 0 0 0 0.31 0 0 0 0.12 0"/>
       <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1_1"/>
       <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1_1" result="shape"/>
     </filter>
@@ -41,7 +68,8 @@
 
   <g filter="url(#panel-shadow)">
     <rect x="42" y="30" width="280" height="280" rx="78" fill="url(#panel)"/>
-    <rect x="43.5" y="31.5" width="277" height="277" rx="76.5" stroke="#173463" stroke-width="3"/>
+    <rect x="43.5" y="31.5" width="277" height="277" rx="76.5" stroke="url(#panel-stroke)" stroke-width="3"/>
+    <path d="M80 58C122 42 182 40 236 52C266 58 290 72 304 92" stroke="url(#panel-highlight)" stroke-width="10" stroke-linecap="round"/>
   </g>
   <g clip-path="url(#panel-clip)">
     <circle cx="175.75" cy="152.5" r="117.5" fill="url(#glow)"/>
@@ -58,13 +86,18 @@
 
     <circle cx="212" cy="86.25" r="8.75" fill="#FFF0B8"/>
     <circle cx="225.75" cy="95" r="5.625" fill="#FFF0B8"/>
+    <circle cx="248" cy="109" r="20" fill="url(#plugin-node-glow)"/>
+    <circle cx="248" cy="109" r="6.5" fill="#FF8E6B"/>
+    <circle cx="248" cy="109" r="2.25" fill="#FFF4E6"/>
   </g>
 
   <g transform="translate(370 74)">
-    <text x="0" y="106" fill="url(#word)" font-family="'Sora', 'Space Grotesk', sans-serif" font-size="116" font-weight="760" letter-spacing="-2">
-      humming
-    </text>
-    <text x="4" y="160" fill="#4B6891" font-family="'IBM Plex Sans', 'Noto Sans', sans-serif" font-size="33" font-weight="520" letter-spacing="0.2">
+    <g filter="url(#word-shadow)">
+      <text x="0" y="106" fill="url(#word)" font-family="'Sora', 'Space Grotesk', sans-serif" font-size="116" font-weight="760" letter-spacing="-2">
+        humming
+      </text>
+    </g>
+    <text x="4" y="160" fill="url(#tagline)" font-family="'IBM Plex Sans', 'Noto Sans', sans-serif" font-size="33" font-weight="520" letter-spacing="0.2">
       plugin-first lightweight BFF kernel
     </text>
   </g>

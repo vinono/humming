@@ -2,9 +2,9 @@
   <img src="./assets/brand/humming-logo.svg" alt="humming logo" width="560" />
 </p>
 
-<p align="center"><strong>Lightweight BFF core with plugin-first extension.</strong></p>
+<p align="center"><strong>Plugin-first lightweight BFF core for Bun.</strong></p>
 
-`humming` is a thin, explicit BFF kernel for frontend teams and small platform teams that want local routes, options, and forwarding without adopting a heavyweight backend framework or API gateway.
+`humming` is a thin, explicit BFF kernel for frontend teams and small platform teams that want local routes, options, and forwarding without adopting a heavyweight backend framework or full API gateway.
 
 ## Quick Start
 
@@ -14,26 +14,13 @@ Install dependencies:
 bun install
 ```
 
-Run the minimal example:
-
-```bash
-bun run example:basic
-```
-
-Then try:
-
-```bash
-curl http://localhost:8787/health
-curl "http://localhost:8787/api/options?keys=status"
-```
-
-Run the plugin example:
+Run the main plugin example:
 
 ```bash
 bun run example:with-plugins
 ```
 
-Then try:
+Try the core flows:
 
 ```bash
 curl http://localhost:8788/health
@@ -44,46 +31,82 @@ curl -i -H "Authorization: Bearer demo-token" http://localhost:8788/api/hello
 curl -i -H "Authorization: Bearer demo-token" http://localhost:8788/api/hello
 ```
 
-Run the forward example:
+What you should see:
 
-```bash
-bun run example:with-forward
-```
+- `/health`: core health endpoint
+- `/metrics`: Prometheus-style metrics
+- `/api/options`: options registry output
+- first `/api/hello`: authenticated response with `x-humming-cache: MISS`
+- second `/api/hello`: cached response with `x-humming-cache: HIT`
+- third `/api/hello`: rate-limited response with `429`
 
-Then try:
+## At A Glance
 
-```bash
-curl http://localhost:8789/health
-curl -i "http://localhost:8789/api/backend/ping?name=humming"
-```
+- Bun-first runtime built on Hono
+- small core with explicit extension points
+- `health`, `options`, and `forward` stay in core
+- auth, cache, metrics, rate limiting, and similar behavior live in plugins
+- sync and async plugin setup are both supported
 
-Run the async plugin example:
+## What humming Is
 
-```bash
-bun run example:with-async-plugin
-```
+- a lightweight BFF core
+- a place to combine local routes, option endpoints, and upstream forwarding
+- a plugin-first runtime for operational and business extensions
+- a good fit when you want clarity over framework magic
 
-Then try:
+## What humming Is Not
 
-```bash
-curl http://localhost:8790/health
-curl http://localhost:8790/api/ready
+- not a full API gateway replacement
+- not a large backend application framework
+- not an all-in platform with hidden conventions
+
+## Official Plugins
+
+Current official plugins in this repository:
+
+| Plugin | Purpose | Typical Use |
+| --- | --- | --- |
+| `createAuthPlugin()` | Protect routes with token validation, JWT verification, and role rules | BFF auth guard, internal admin routes, bearer/JWT protection |
+| `createCachePlugin()` | Cache eligible responses with memory or Redis-backed stores | reduce repeated reads, endpoint caching, multi-instance deployments |
+| `createCorsPlugin()` | Apply CORS headers and handle preflight | browser clients, frontend-local development, cross-origin access |
+| `createMetricsPlugin()` | Expose Prometheus-style request metrics from the BFF edge | scraping with Prometheus, latency visibility, request volume monitoring |
+| `createRequestLoggerPlugin()` | Log request-start events with request metadata | debugging, request tracing, audit-friendly access logs |
+| `createRateLimitPlugin()` | Enforce request ceilings with memory or Redis-backed stores | burst protection, per-user throttling, internal API safety rails |
+| `createOptionsStaticPlugin()` | Register the `static` option source into an empty registry | static enums, local select options, bootstrap datasets |
+| `createOptionsHttpPlugin()` | Register the `http` option source into an empty registry | remote options, upstream dictionaries, backend-driven selects |
+
+## Architecture
+
+`humming` is intentionally simple:
+
+```text
+client
+  -> humming core
+    -> built-in health / options / forward
+    -> official or custom plugins
+      -> local routes
+      -> middleware
+      -> option sources
+      -> forward hooks
+    -> upstream services
 ```
 
 ## Examples
 
 - `examples/basic`: smallest useful app with core built-ins only
+- `examples/with-plugins`: auth, metrics, rate-limit, cache, options, and a custom plugin route
+- `examples/with-forward`: forwarding plus request and response hooks
 - `examples/with-async-plugin`: `createApp()` plus async plugin setup
-- `examples/with-plugins`: official plugins plus one custom plugin
-- `examples/with-forward`: forwarding plus request/response hooks
 
-## Why humming
+Run them:
 
-- keep the core small and predictable
-- keep `health` in core as an operational baseline
-- make business behavior easy to add as plugins
-- support local routes, option endpoints, and backend forwarding in one place
-- make extension points explicit instead of hiding them in framework magic
+```bash
+bun run example:basic
+bun run example:with-plugins
+bun run example:with-forward
+bun run example:with-async-plugin
+```
 
 ## What Lives In Core
 
@@ -302,22 +325,9 @@ const app = createAppSync({
 });
 ```
 
-## Official Plugins
+## Plugin Notes
 
-Current official plugins in this repository:
-
-| Plugin | Purpose | Typical Use |
-| --- | --- | --- |
-| `createAuthPlugin()` | Protect routes with token validation, JWT verification, and role rules | BFF auth guard, internal admin routes, bearer/JWT protection |
-| `createCachePlugin()` | Cache eligible responses with memory or Redis-backed stores | reduce repeated reads, endpoint caching, multi-instance deployments |
-| `createCorsPlugin()` | Apply CORS headers and handle preflight | browser clients, frontend-local development, cross-origin access |
-| `createMetricsPlugin()` | Expose Prometheus-style request metrics from the BFF edge | scraping with Prometheus, latency visibility, request volume monitoring |
-| `createRequestLoggerPlugin()` | Log request-start events with request metadata | debugging, request tracing, audit-friendly access logs |
-| `createRateLimitPlugin()` | Enforce request ceilings with memory or Redis-backed stores | burst protection, per-user throttling, internal API safety rails |
-| `createOptionsStaticPlugin()` | Register the `static` option source into an empty registry | static enums, local select options, bootstrap datasets |
-| `createOptionsHttpPlugin()` | Register the `http` option source into an empty registry | remote options, upstream dictionaries, backend-driven selects |
-
-## Cache Plugin
+### Cache Plugin
 
 `createCachePlugin()` defaults to an in-memory store, which is a good fit for local development and single-instance deployment.
 
@@ -348,7 +358,7 @@ Available store helpers:
 - `createMemoryCacheStore()`
 - `createRedisCacheStore()`
 
-## Metrics Plugin
+### Metrics Plugin
 
 `createMetricsPlugin()` collects request totals, in-flight requests, and latency histograms, then exposes them through a Prometheus-compatible endpoint.
 
@@ -376,7 +386,7 @@ Default endpoint:
 
 - `GET /metrics`
 
-## Rate Limit Plugin
+### Rate Limit Plugin
 
 `createRateLimitPlugin()` defaults to an in-memory fixed-window limiter and can also use Redis for shared limits.
 
@@ -477,7 +487,7 @@ Main environment variables:
 - `OPTIONS_CONFIG`: JSON string for option rules
 - `FORWARD_ENABLED`: enable or disable forward terminal
 - `FORWARD_TIMEOUT_MS`: upstream timeout in milliseconds
-- `FORWARD_BLOCK_PRIVATE_IP`: block localhost/private forward targets
+- `FORWARD_BLOCK_PRIVATE_IP`: block localhost and private forward targets
 - `FORWARD_FALLBACK_TARGET`: optional fallback upstream target
 - `FORWARD_RULES`: JSON string forward rules array
 
