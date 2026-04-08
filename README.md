@@ -1,45 +1,18 @@
-# humming
+<p align="center">
+  <img src="./assets/brand/humming-logo.svg" alt="humming logo" width="560" />
+</p>
 
-`humming` is a plugin-first lightweight BFF kernel built with Bun, Hono, zod, and pino.
+<p align="center"><strong>Lightweight BFF core with plugin-first extension.</strong></p>
 
-It is for frontend teams and small platform teams that want a thin, explicit BFF layer without moving into a heavyweight backend framework or API gateway.
+`humming` is a thin, explicit BFF kernel for frontend teams and small platform teams that want local routes, options, and forwarding without adopting a heavyweight backend framework or API gateway.
 
-## Why humming
-
-- keep the core small and predictable
-- keep `health` in core as an operational baseline
-- make business behavior easy to add as plugins
-- support local routes, option endpoints, and backend forwarding in one place
-- make extension points explicit instead of hiding them in framework magic
-
-## What Lives In Core
-
-Core is intentionally narrow:
-
-- request context and correlation ids
-- consistent error handling
-- `GET /health`
-- `GET /api/options`
-- `POST /api/options`
-- forward terminal
-- plugin registration and shared services
-
-Anything business-specific or operationally optional should prefer a plugin.
-
-## Install
-
-Prerequisites:
-
-- Bun
-- Node-compatible TypeScript tooling
+## Quick Start
 
 Install dependencies:
 
 ```bash
 bun install
 ```
-
-## Quick Start
 
 Run the minimal example:
 
@@ -64,8 +37,11 @@ Then try:
 
 ```bash
 curl http://localhost:8788/health
-curl http://localhost:8788/api/hello
+curl http://localhost:8788/metrics
 curl "http://localhost:8788/api/options?keys=teams,countries"
+curl -i -H "Authorization: Bearer demo-token" http://localhost:8788/api/hello
+curl -i -H "Authorization: Bearer demo-token" http://localhost:8788/api/hello
+curl -i -H "Authorization: Bearer demo-token" http://localhost:8788/api/hello
 ```
 
 Run the forward example:
@@ -81,11 +57,47 @@ curl http://localhost:8789/health
 curl -i "http://localhost:8789/api/backend/ping?name=humming"
 ```
 
+Run the async plugin example:
+
+```bash
+bun run example:with-async-plugin
+```
+
+Then try:
+
+```bash
+curl http://localhost:8790/health
+curl http://localhost:8790/api/ready
+```
+
 ## Examples
 
 - `examples/basic`: smallest useful app with core built-ins only
+- `examples/with-async-plugin`: `createApp()` plus async plugin setup
 - `examples/with-plugins`: official plugins plus one custom plugin
 - `examples/with-forward`: forwarding plus request/response hooks
+
+## Why humming
+
+- keep the core small and predictable
+- keep `health` in core as an operational baseline
+- make business behavior easy to add as plugins
+- support local routes, option endpoints, and backend forwarding in one place
+- make extension points explicit instead of hiding them in framework magic
+
+## What Lives In Core
+
+Core is intentionally narrow:
+
+- request context and correlation ids
+- consistent error handling
+- `GET /health`
+- `GET /api/options`
+- `POST /api/options`
+- forward terminal
+- plugin registration and shared services
+
+Anything business-specific or operationally optional should prefer a plugin.
 
 ## Create A Basic App
 
@@ -120,8 +132,12 @@ Bun.serve({
 import { Bun } from 'bun';
 import { Hono } from 'hono';
 import {
+  createAuthPlugin,
   createAppSync,
+  createCachePlugin,
   createCorsPlugin,
+  createMetricsPlugin,
+  createRateLimitPlugin,
   createRequestLoggerPlugin,
   definePlugin,
   mapArrayToOptions,
@@ -146,13 +162,23 @@ const env = parseEnv({
 const memoryOptionsPlugin = definePlugin({
   name: 'memory-options',
   setup({ route, services }) {
+    let helloHits = 0;
+
     services.options.registerSource('memory', async ({ rule }) => {
       const items = Array.isArray(rule.items) ? rule.items : [];
       return mapArrayToOptions(items, 'id', 'name');
     });
 
     const routes = new Hono();
-    routes.get('/api/hello', (c) => c.json({ ok: true }));
+    routes.get('/api/hello', (c) =>
+      c.json({
+        result: true,
+        data: {
+          message: 'hello from plugin route',
+          hits: ++helloHits,
+        },
+      })
+    );
     route('/', routes);
   },
 });
@@ -165,8 +191,36 @@ const app = createAppSync({
     forward: false,
   },
   plugins: [
-    createCorsPlugin(),
     createRequestLoggerPlugin(),
+    createAuthPlugin({
+      publicPaths: ['/health', '/metrics', '/api/options*'],
+      validate({ token }) {
+        return token === 'demo-token';
+      },
+    }),
+    createMetricsPlugin(),
+    createRateLimitPlugin({
+      includePaths: ['/api/hello'],
+      limit: 2,
+      windowMs: 10_000,
+      key({ context }) {
+        return context.req.header('authorization') ?? 'anonymous';
+      },
+    }),
+    createCachePlugin({
+      includePaths: ['/api/hello'],
+      ttlMs: 30_000,
+    }),
+    createCorsPlugin({
+      exposeHeaders: [
+        'x-correlation-id',
+        'x-humming-cache',
+        'ratelimit-limit',
+        'ratelimit-remaining',
+        'ratelimit-reset',
+        'retry-after',
+      ],
+    }),
     memoryOptionsPlugin,
   ],
 });
@@ -222,6 +276,10 @@ const app = createAppSync({
 });
 ```
 
+Detailed guide:
+
+- `PLUGIN_GUIDE.md`
+
 ## Core API
 
 Main exports:
@@ -248,10 +306,108 @@ const app = createAppSync({
 
 Current official plugins in this repository:
 
-- `createCorsPlugin()`
-- `createRequestLoggerPlugin()`
-- `createOptionsStaticPlugin()`
-- `createOptionsHttpPlugin()`
+| Plugin | Purpose | Typical Use |
+| --- | --- | --- |
+| `createAuthPlugin()` | Protect routes with token validation, JWT verification, and role rules | BFF auth guard, internal admin routes, bearer/JWT protection |
+| `createCachePlugin()` | Cache eligible responses with memory or Redis-backed stores | reduce repeated reads, endpoint caching, multi-instance deployments |
+| `createCorsPlugin()` | Apply CORS headers and handle preflight | browser clients, frontend-local development, cross-origin access |
+| `createMetricsPlugin()` | Expose Prometheus-style request metrics from the BFF edge | scraping with Prometheus, latency visibility, request volume monitoring |
+| `createRequestLoggerPlugin()` | Log request-start events with request metadata | debugging, request tracing, audit-friendly access logs |
+| `createRateLimitPlugin()` | Enforce request ceilings with memory or Redis-backed stores | burst protection, per-user throttling, internal API safety rails |
+| `createOptionsStaticPlugin()` | Register the `static` option source into an empty registry | static enums, local select options, bootstrap datasets |
+| `createOptionsHttpPlugin()` | Register the `http` option source into an empty registry | remote options, upstream dictionaries, backend-driven selects |
+
+## Cache Plugin
+
+`createCachePlugin()` defaults to an in-memory store, which is a good fit for local development and single-instance deployment.
+
+If you need shared cache across instances, inject a Redis-backed store:
+
+```ts
+import { createCachePlugin, createRedisCacheStore } from 'humming';
+
+const cacheStore = createRedisCacheStore({
+  url: Bun.env.REDIS_URL,
+  prefix: 'humming:prod',
+});
+
+const app = createAppSync({
+  env,
+  plugins: [
+    createCachePlugin({
+      includePaths: ['/api/catalog*'],
+      ttlMs: 15_000,
+      store: cacheStore,
+    }),
+  ],
+});
+```
+
+Available store helpers:
+
+- `createMemoryCacheStore()`
+- `createRedisCacheStore()`
+
+## Metrics Plugin
+
+`createMetricsPlugin()` collects request totals, in-flight requests, and latency histograms, then exposes them through a Prometheus-compatible endpoint.
+
+```ts
+import { createMetricsPlugin } from 'humming';
+
+const app = createAppSync({
+  env,
+  plugins: [
+    createMetricsPlugin({
+      path: '/metrics',
+      labelPath({ path }) {
+        if (path.startsWith('/api/users/')) {
+          return '/api/users/:id';
+        }
+
+        return path;
+      },
+    }),
+  ],
+});
+```
+
+Default endpoint:
+
+- `GET /metrics`
+
+## Rate Limit Plugin
+
+`createRateLimitPlugin()` defaults to an in-memory fixed-window limiter and can also use Redis for shared limits.
+
+```ts
+import { createRateLimitPlugin, createRedisRateLimitStore } from 'humming';
+
+const rateLimitStore = createRedisRateLimitStore({
+  url: Bun.env.REDIS_URL,
+  prefix: 'humming:prod',
+});
+
+const app = createAppSync({
+  env,
+  plugins: [
+    createRateLimitPlugin({
+      includePaths: ['/api/search*'],
+      limit: 30,
+      windowMs: 60_000,
+      store: rateLimitStore,
+      key({ context }) {
+        return context.req.header('authorization') ?? 'anonymous';
+      },
+    }),
+  ],
+});
+```
+
+Available store helpers:
+
+- `createMemoryRateLimitStore()`
+- `createRedisRateLimitStore()`
 
 ## Options Registry
 
@@ -358,6 +514,12 @@ Run typecheck:
 bun run typecheck
 ```
 
+Release prep:
+
+- `RELEASE_CHECKLIST.md`
+- `CHANGELOG.md`
+- `RELEASE_NOTES_v0.1.0.md`
+
 ## Repository Structure
 
 - `src/core`: app runtime and plugin model
@@ -365,6 +527,10 @@ bun run typecheck
 - `src/forward`: forward proxy and hooks
 - `src/plugins`: official plugins
 - `examples`: runnable examples
+- `PLUGIN_GUIDE.md`: plugin authoring guide
+- `RELEASE_CHECKLIST.md`: first-release and publish checklist
+- `CHANGELOG.md`: project change history
+- `RELEASE_NOTES_v0.1.0.md`: first GitHub release notes draft
 
 ## Brand Assets
 

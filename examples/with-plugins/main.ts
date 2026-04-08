@@ -1,7 +1,11 @@
 import {
   type AppBindings,
+  createAuthPlugin,
   createAppSync,
+  createCachePlugin,
   createCorsPlugin,
+  createMetricsPlugin,
+  createRateLimitPlugin,
   createRequestLoggerPlugin,
   definePlugin,
   mapArrayToOptions,
@@ -36,6 +40,8 @@ const env = parseEnv({
 const memoryOptionsPlugin = definePlugin({
   name: 'memory-options',
   setup({ route, services }) {
+    let helloHits = 0;
+
     services.options.registerSource('memory', async ({ rule }) => {
       const items = Array.isArray(rule.items) ? rule.items : [];
       return mapArrayToOptions(items, 'id', 'name');
@@ -43,10 +49,13 @@ const memoryOptionsPlugin = definePlugin({
 
     const routes = new Hono<AppBindings>();
     routes.get('/api/hello', (c) => {
+      helloHits += 1;
+
       return c.json({
         result: true,
         data: {
           message: 'hello from plugin route',
+          hits: helloHits,
         },
         requestId: c.get('requestId'),
       });
@@ -64,12 +73,39 @@ const app = createAppSync({
     forward: false,
   },
   plugins: [
-    createCorsPlugin({
-      allowOrigin: '*',
-      exposeHeaders: ['x-correlation-id'],
-    }),
     createRequestLoggerPlugin({
       message: 'example request started',
+    }),
+    createAuthPlugin({
+      publicPaths: ['/health', '/metrics', '/api/options*'],
+      validate({ token }) {
+        return token === 'demo-token';
+      },
+      invalidTokenMessage: 'Use Authorization: Bearer demo-token',
+    }),
+    createMetricsPlugin(),
+    createRateLimitPlugin({
+      includePaths: ['/api/hello'],
+      limit: 2,
+      windowMs: 10_000,
+      key({ context }) {
+        return context.req.header('authorization') ?? 'anonymous';
+      },
+    }),
+    createCachePlugin({
+      includePaths: ['/api/hello'],
+      ttlMs: 30_000,
+    }),
+    createCorsPlugin({
+      allowOrigin: '*',
+      exposeHeaders: [
+        'x-correlation-id',
+        'x-humming-cache',
+        'ratelimit-limit',
+        'ratelimit-remaining',
+        'ratelimit-reset',
+        'retry-after',
+      ],
     }),
     memoryOptionsPlugin,
   ],
