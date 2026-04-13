@@ -1,9 +1,9 @@
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { ZodError } from 'zod';
-import { env as defaultEnv, type AppEnv } from '../config/env';
+import { parseEnv, type AppEnv } from '../config/env';
 import { createForwardProxy } from '../forward/proxy';
-import { createLogger, logger as defaultLogger, type AppLogger } from '../logger';
+import { createLogger, type AppLogger } from '../logger';
 import { requestIdMiddleware } from '../middleware/request-id';
 import { createOptionsRoutes } from '../options/routes';
 import { createOptionsService } from '../options/service';
@@ -125,9 +125,8 @@ function installErrorHandling(
 }
 
 function buildBaseApp(options: CreateAppOptions) {
-  const appEnv = options.env ?? defaultEnv;
-  const appLogger =
-    options.logger ?? (options.env ? createLogger({ level: appEnv.LOG_LEVEL }) : defaultLogger);
+  const appEnv = options.env ?? parseEnv(Bun.env);
+  const appLogger = options.logger ?? createLogger({ level: appEnv.LOG_LEVEL });
   const builtins = mergeBuiltins(options.builtins);
   const services = createServices(appEnv, options.services);
   const plugins = options.plugins ?? [];

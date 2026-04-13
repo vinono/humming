@@ -32,10 +32,14 @@ The format is based on Keep a Changelog.
   - `examples/with-forward`
   - `examples/with-async-plugin`
 - `PLUGIN_GUIDE.md` for plugin authoring
-- GitHub Actions CI for install, typecheck, and test
+- compiled `dist/` publish artifacts with ESM JavaScript and `.d.ts` declarations
+- fresh Bun consumer smoke test coverage using the packed tarball in a temporary project
+- public root-entry smoke test coverage for package consumption
+- GitHub Actions CI for install, typecheck, build, package-entry smoke test, consumer smoke test, and test
 - dual license support under `MIT OR Apache-2.0`
 
 ### Notes
 
 - the project is currently Bun-first
+- the public package root is side-effect free and does not eagerly validate `Bun.env`
 - the first public release is intentionally scoped as a lightweight BFF core, not a full API gateway or backend platform

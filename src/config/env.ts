@@ -60,5 +60,3 @@ export type AppEnv = z.infer<typeof EnvSchema>;
 export function parseEnv(source: Record<string, unknown> = Bun.env): AppEnv {
   return EnvSchema.parse(source);
 }
-
-export const env = parseEnv(Bun.env);

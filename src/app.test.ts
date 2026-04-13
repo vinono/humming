@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'bun:test';
-import { app } from './app';
+import { parseEnv } from './config/env';
+import { createAppSync } from './app';
 
 type ErrorBody = {
   result: boolean;
@@ -9,6 +10,11 @@ type ErrorBody = {
 
 describe('app integration', () => {
   it('returns validation errors as 400 for invalid options payload', async () => {
+    const app = createAppSync({
+      env: parseEnv({
+        FORWARD_ENABLED: 'false',
+      }),
+    });
     const response = await app.request('/api/options', {
       method: 'POST',
       headers: {

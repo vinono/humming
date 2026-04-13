@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { env } from '../config/env';
 import { createHttpClient, httpClient } from '../http/client';
 import type { FetchLike } from '../http/types';
 import { createOptionSourceRegistry, type OptionSourceRegistry } from './registry';
@@ -36,7 +35,7 @@ export function createOptionsService(options?: {
   fetchImpl?: FetchLike;
   registry?: OptionSourceRegistry;
 }) {
-  const config = OptionsConfigSchema.parse(JSON.parse(options?.configJson ?? env.OPTIONS_CONFIG));
+  const config = OptionsConfigSchema.parse(JSON.parse(options?.configJson ?? '{}'));
   const client = options?.fetchImpl ? createInlineHttpClient(options.fetchImpl) : httpClient;
   const registry = options?.registry ?? createDefaultOptionSourceRegistry(client);
 

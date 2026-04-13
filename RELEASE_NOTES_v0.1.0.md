@@ -13,6 +13,9 @@ This first public release focuses on a narrow core:
 
 - Bun-first lightweight BFF runtime built on Hono
 - plugin model with `createApp()`, `createAppSync()`, and `definePlugin()`
+- side-effect-free package root that can be imported without eagerly creating an app or validating `Bun.env`
+- compiled `dist/` package output with ESM JavaScript and `.d.ts` declarations
+- automated fresh-consumer smoke coverage using the packed tarball in a temporary Bun project
 - official plugins for auth, cache, metrics, rate limiting, CORS, request logging, and options providers
 - examples for basic usage, plugin usage, forwarding, and async plugin setup
 - plugin guide and release checklist included in the repository
@@ -51,6 +54,7 @@ Examples:
 - this release is intentionally small and explicit
 - `humming` is not trying to replace a full API gateway
 - the package is designed around Bun-first usage
+- the repository includes dedicated package-entry and tarball-consumer smoke tests to guard the public import surface
 
 ## Start Here
 

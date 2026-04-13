@@ -312,6 +312,14 @@ Main exports:
 - `definePlugin()`: typed helper for plugin authoring
 - `parseEnv()`: validates runtime config
 
+Entry behavior:
+
+- the package root exports factory functions and types only
+- importing `humming` does not create a default app instance
+- importing `humming` does not eagerly validate `Bun.env`
+- published packages ship compiled ESM in `dist/` plus `.d.ts` declarations
+- `src/main.ts` is the repository's local development entrypoint, not part of the public package API
+
 Built-ins are individually switchable:
 
 ```ts
@@ -506,10 +514,28 @@ Example forward rules:
 
 ## Development
 
-Run the default app:
+Run the local development entrypoint:
 
 ```bash
 bun run dev
+```
+
+Build the published package artifacts:
+
+```bash
+bun run build
+```
+
+Smoke test the public package entry:
+
+```bash
+bun run test:entry
+```
+
+Smoke test package consumption from a fresh Bun project using the packed tarball:
+
+```bash
+bun run test:consumer
 ```
 
 Run tests:

@@ -1,6 +1,5 @@
 import type { Context } from 'hono';
 import { z } from 'zod';
-import { env } from '../config/env';
 import { logger } from '../logger';
 import type { AppBindings } from '../types';
 import type { ForwardMethod, ForwardRule } from './types';
@@ -129,6 +128,13 @@ export type ForwardHookSet = {
   beforeRequest?: ForwardBeforeRequestHook;
   afterResponse?: ForwardAfterResponseHook;
   onError?: ForwardOnErrorHook;
+};
+
+const DEFAULT_FORWARD_PROXY_OPTIONS: ForwardProxyOptions = {
+  enabled: true,
+  defaultTimeoutMs: 15_000,
+  blockPrivateIp: true,
+  rulesJson: '[]',
 };
 
 function parseForwardRules(raw: string): ForwardRule[] {
@@ -608,11 +614,11 @@ export function createForwardProxy(options: ForwardProxyOptions) {
 export type ForwardProxy = ReturnType<typeof createForwardProxy>;
 
 const defaultForwardProxy = createForwardProxy({
-  enabled: env.FORWARD_ENABLED,
-  defaultTimeoutMs: env.FORWARD_TIMEOUT_MS,
-  blockPrivateIp: env.FORWARD_BLOCK_PRIVATE_IP,
-  fallbackTarget: env.FORWARD_FALLBACK_TARGET,
-  rulesJson: env.FORWARD_RULES,
+  enabled: DEFAULT_FORWARD_PROXY_OPTIONS.enabled,
+  defaultTimeoutMs: DEFAULT_FORWARD_PROXY_OPTIONS.defaultTimeoutMs,
+  blockPrivateIp: DEFAULT_FORWARD_PROXY_OPTIONS.blockPrivateIp,
+  fallbackTarget: DEFAULT_FORWARD_PROXY_OPTIONS.fallbackTarget,
+  rulesJson: DEFAULT_FORWARD_PROXY_OPTIONS.rulesJson,
 });
 
 export const tryForwardRequest = defaultForwardProxy.tryForwardRequest;

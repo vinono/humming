@@ -32,6 +32,9 @@ Current repository snapshot on 2026-04-08:
 ## 3. Quality Gate
 
 - [ ] run `bun run typecheck`
+- [ ] run `bun run build`
+- [ ] run `bun run test:entry`
+- [ ] run `bun run test:consumer`
 - [ ] run `bun test`
 - [ ] smoke run examples:
   - [ ] `bun run example:basic`
@@ -76,13 +79,15 @@ Use this section only if you want to publish to npm.
   - [ ] `engines.bun`
 - [ ] run `npm pack --dry-run` or `bun pm pack` and inspect included files
 - [ ] verify the package tarball contains:
-  - [ ] `index.ts`
-  - [ ] `src/`
+  - [ ] `dist/index.js`
+  - [ ] `dist/index.d.ts`
+  - [ ] `dist/src/`
   - [ ] `README.md`
   - [ ] `LICENSE-MIT`
   - [ ] `LICENSE-APACHE`
 - [ ] smoke test package consumption in a fresh Bun project
-- [ ] decide whether source-only TypeScript export is acceptable for the first release
+- [ ] verify the package root import does not eagerly create an app or validate `Bun.env`
+- [ ] verify `exports`, `main`, `module`, and `types` all point at `dist/`
 
 ## 6. Release Notes
 

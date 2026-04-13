@@ -1,4 +1,4 @@
-export { app, createApp, createAppSync, definePlugin } from './src/app';
+export { createApp, createAppSync, definePlugin } from './src/app';
 export * from './src/config/env';
 export type {
   CreateAppOptions,

@@ -25,5 +25,14 @@ jobs:
       - name: Typecheck
         run: bun run typecheck
 
+      - name: Build
+        run: bun run build
+
+      - name: Package Entry Smoke Test
+        run: bun run test:entry
+
+      - name: Consumer Smoke Test
+        run: bun run test:consumer
+
       - name: Test
         run: bun test
