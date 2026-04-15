@@ -11,6 +11,7 @@ export const requestIdMiddleware: MiddlewareHandler<AppBindings> = async (c, nex
   c.set('requestId', requestId);
   c.set('startAt', startAt);
   c.set('authUser', null);
+  c.set('localDebugRuntimeApplied', false);
 
   await next();
 

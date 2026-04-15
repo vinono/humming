@@ -4,11 +4,23 @@ import type { AppEnv } from '../config/env';
 import type { ForwardProxy } from '../forward/proxy';
 import type { AppLogger } from '../logger';
 import type { OptionsService } from '../options/service';
+import type { LocalDebugRuntimeService } from '../runtime/local-debug';
 import type { AppBindings } from '../types';
 
 export type HummingServices = {
   options: OptionsService;
   forwardProxy: ForwardProxy;
+  localDebugRuntime: LocalDebugRuntimeService;
+};
+
+export type HummingPluginMode = 'all' | AppEnv['NODE_ENV'] | Array<AppEnv['NODE_ENV']>;
+
+export type HummingPluginMeta = {
+  priority?: number;
+  mode?: HummingPluginMode;
+  debugLabel?: string;
+  dependencies?: string[];
+  conflicts?: string[];
 };
 
 export type HummingPluginContext = {
@@ -22,6 +34,7 @@ export type HummingPluginContext = {
 
 export type HummingPlugin = {
   name: string;
+  meta?: HummingPluginMeta;
   setup: (context: HummingPluginContext) => void | Promise<void>;
 };
 

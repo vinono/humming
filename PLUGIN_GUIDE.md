@@ -29,6 +29,34 @@ export const myPlugin = definePlugin({
 });
 ```
 
+Optional metadata helps govern plugin behavior:
+
+```ts
+definePlugin({
+  name: 'dev-toolbar',
+  meta: {
+    priority: 100,
+    mode: 'development',
+    debugLabel: 'local-debug',
+    dependencies: ['request-logger'],
+    conflicts: ['legacy-toolbar'],
+  },
+  setup(context) {
+    // ...
+  },
+});
+```
+
+Metadata fields:
+
+- `priority`: higher numbers run earlier
+- `mode`: `development`, `test`, `production`, `all`, or an array of modes
+- `debugLabel`: readable label for debugging and error messages
+- `dependencies`: plugin names that must already be enabled
+- `conflicts`: plugin names that cannot be enabled together
+
+At startup, `humming` validates duplicate names, missing dependencies, and declared conflicts before plugin setup runs.
+
 ## Plugin Context
 
 Each plugin receives:
@@ -38,8 +66,11 @@ Each plugin receives:
 - `logger`: shared logger
 - `services.options`: option registry access
 - `services.forwardProxy`: forward hook registration
+- `services.localDebugRuntime`: shared local debug state for login env, target, cookies, and tenant data
 - `use(path, middleware)`: register middleware
 - `route(path, routes)`: mount Hono routes
+
+If multiple local-debug plugins need to coordinate environment switching or cookie state, prefer `services.localDebugRuntime` as the single in-process source of truth instead of having each plugin read its own file.
 
 ## Sync Plugin Example
 

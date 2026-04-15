@@ -53,6 +53,9 @@ const EnvSchema = z.object({
   FORWARD_BLOCK_PRIVATE_IP: booleanFromEnv(true),
   FORWARD_FALLBACK_TARGET: HttpUrlSchema.optional(),
   FORWARD_RULES: z.string().default('[]'),
+  FORWARD_TRANSPORT: z.string().trim().min(1).default('fetch'),
+  FORWARD_TRANSPORT_RETRY_MAX_ATTEMPTS: z.coerce.number().int().min(1).max(10).default(3),
+  FORWARD_TRANSPORT_RETRY_DELAY_MS: z.coerce.number().int().min(0).max(10_000).default(100),
 });
 
 export type AppEnv = z.infer<typeof EnvSchema>;

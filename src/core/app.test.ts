@@ -2,7 +2,9 @@ import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
 import { Hono } from 'hono';
 import { createApp, createAppSync, definePlugin } from './app';
 import { createForwardProxy } from '../forward/proxy';
+import { createLogger } from '../logger';
 import type { AppBindings } from '../types';
+import { parseEnv } from '../config/env';
 
 const originalFetch = globalThis.fetch;
 
@@ -137,5 +139,318 @@ describe('core app runtime', () => {
     expect(response.status).toBe(200);
     expect(String(calls[0]?.input)).toBe('https://backend.example.com/api/ping');
     expect(new Headers(calls[0]?.init?.headers).get('x-core-plugin')).toBe('enabled');
+  });
+
+  it('orders plugins by descending priority', async () => {
+    const setupOrder: string[] = [];
+    const app = createAppSync({
+      builtins: {
+        health: false,
+        options: false,
+        forward: false,
+      },
+      plugins: [
+        definePlugin({
+          name: 'normal-plugin',
+          setup({ route }) {
+            setupOrder.push('normal');
+            const routes = new Hono<AppBindings>();
+            routes.get('/normal', (c) => c.json({ ok: true }));
+            route('/', routes);
+          },
+        }),
+        definePlugin({
+          name: 'high-priority-plugin',
+          meta: {
+            priority: 100,
+          },
+          setup({ route }) {
+            setupOrder.push('high');
+            const routes = new Hono<AppBindings>();
+            routes.get('/high', (c) => c.json({ ok: true }));
+            route('/', routes);
+          },
+        }),
+      ],
+    });
+
+    expect(setupOrder).toEqual(['high', 'normal']);
+    expect((await app.request('/high')).status).toBe(200);
+    expect((await app.request('/normal')).status).toBe(200);
+  });
+
+  it('skips plugins whose mode does not match the current env', async () => {
+    const app = createAppSync({
+      env: parseEnv({
+        NODE_ENV: 'production',
+        PORT: '8787',
+        FORWARD_ENABLED: 'false',
+      }),
+      builtins: {
+        health: false,
+        options: false,
+        forward: false,
+      },
+      plugins: [
+        definePlugin({
+          name: 'dev-only',
+          meta: {
+            mode: 'development',
+          },
+          setup({ route }) {
+            const routes = new Hono<AppBindings>();
+            routes.get('/dev-only', (c) => c.json({ ok: true }));
+            route('/', routes);
+          },
+        }),
+        definePlugin({
+          name: 'prod-only',
+          meta: {
+            mode: ['production', 'test'],
+          },
+          setup({ route }) {
+            const routes = new Hono<AppBindings>();
+            routes.get('/prod-only', (c) => c.json({ ok: true }));
+            route('/', routes);
+          },
+        }),
+      ],
+    });
+
+    expect((await app.request('/dev-only')).status).toBe(404);
+    expect((await app.request('/prod-only')).status).toBe(200);
+  });
+
+  it('includes debugLabel in the async plugin sync error message', () => {
+    const plugin = definePlugin({
+      name: 'async-plugin',
+      meta: {
+        debugLabel: 'boot-sequence',
+      },
+      async setup() {},
+    });
+
+    expect(() =>
+      createAppSync({
+        builtins: {
+          options: false,
+          forward: false,
+        },
+        plugins: [plugin],
+      })
+    ).toThrow('async-plugin (boot-sequence)');
+  });
+
+  it('fails when a plugin dependency is missing', () => {
+    const plugin = definePlugin({
+      name: 'dependent-plugin',
+      meta: {
+        dependencies: ['base-plugin'],
+      },
+      setup() {},
+    });
+
+    expect(() =>
+      createAppSync({
+        builtins: {
+          options: false,
+          forward: false,
+        },
+        plugins: [plugin],
+      })
+    ).toThrow('depends on missing plugin "base-plugin"');
+  });
+
+  it('fails when enabled plugins conflict', () => {
+    const alpha = definePlugin({
+      name: 'alpha-plugin',
+      meta: {
+        conflicts: ['beta-plugin'],
+      },
+      setup() {},
+    });
+
+    const beta = definePlugin({
+      name: 'beta-plugin',
+      setup() {},
+    });
+
+    expect(() =>
+      createAppSync({
+        builtins: {
+          options: false,
+          forward: false,
+        },
+        plugins: [alpha, beta],
+      })
+    ).toThrow('conflicts with enabled plugin "beta-plugin"');
+  });
+
+  it('fails when enabled plugin names are duplicated', () => {
+    const first = definePlugin({
+      name: 'duplicate-plugin',
+      setup() {},
+    });
+
+    const second = definePlugin({
+      name: 'duplicate-plugin',
+      setup() {},
+    });
+
+    expect(() =>
+      createAppSync({
+        builtins: {
+          options: false,
+          forward: false,
+        },
+        plugins: [first, second],
+      })
+    ).toThrow('Duplicate plugin name detected');
+  });
+
+  it('logs resolved and skipped plugins during startup', () => {
+    const capturedLogs: Array<{ payload: unknown; message?: string }> = [];
+    const logger = createLogger({ level: 'info' });
+    logger.info = ((payload: unknown, message?: string) => {
+      capturedLogs.push({ payload, message });
+      return logger;
+    }) as typeof logger.info;
+
+    createAppSync({
+      logger,
+      env: parseEnv({
+        NODE_ENV: 'production',
+        PORT: '8787',
+        FORWARD_ENABLED: 'false',
+      }),
+      builtins: {
+        health: false,
+        options: false,
+        forward: false,
+      },
+      plugins: [
+        definePlugin({
+          name: 'base-plugin',
+          meta: {
+            priority: 50,
+          },
+          setup() {},
+        }),
+        definePlugin({
+          name: 'dependent-plugin',
+          meta: {
+            dependencies: ['base-plugin'],
+          },
+          setup() {},
+        }),
+        definePlugin({
+          name: 'dev-only-plugin',
+          meta: {
+            mode: 'development',
+          },
+          setup() {},
+        }),
+      ],
+    });
+
+    const pluginLog = capturedLogs.find((entry) => entry.message === 'plugins resolved') as
+      | {
+          payload: {
+            nodeEnv: string;
+            enabledPlugins: Array<{ name: string; dependencies: string[] }>;
+            skippedPlugins: Array<{ name: string; reason: string; requestedMode: string }>;
+          };
+        }
+      | undefined;
+
+    expect(pluginLog).toBeDefined();
+    expect(pluginLog?.payload.nodeEnv).toBe('production');
+    expect(pluginLog?.payload.enabledPlugins.map((plugin) => plugin.name)).toEqual([
+      'base-plugin',
+      'dependent-plugin',
+    ]);
+    expect(pluginLog?.payload.enabledPlugins[1]?.dependencies).toEqual(['base-plugin']);
+    expect(pluginLog?.payload.skippedPlugins).toEqual([
+      {
+        name: 'dev-only-plugin',
+        reason: 'mode',
+        requestedMode: 'development',
+      },
+    ]);
+  });
+
+  it('shares localDebugRuntime across plugins and requests', async () => {
+    const setterPlugin = definePlugin({
+      name: 'runtime-setter',
+      setup({ route, services }) {
+        const routes = new Hono<AppBindings>();
+        routes.post('/debug/runtime/set', () => {
+          return Response.json(
+            services.localDebugRuntime.setRuntimeState({
+              loginEnv: 'daily',
+              target: 'https://daily.example.com',
+              configCenterHost: 'https://config.daily.example.com',
+              tenant: 'cn',
+              cookies: {
+                session: 'abc',
+              },
+            })
+          );
+        });
+        route('/', routes);
+      },
+    });
+
+    const readerPlugin = definePlugin({
+      name: 'runtime-reader',
+      setup({ route, services }) {
+        const routes = new Hono<AppBindings>();
+        routes.get('/debug/runtime/state', () => Response.json(services.localDebugRuntime.getRuntimeState()));
+        routes.post('/debug/runtime/clear', () => Response.json(services.localDebugRuntime.clearRuntimeState()));
+        route('/', routes);
+      },
+    });
+
+    const app = createAppSync({
+      builtins: {
+        health: false,
+        options: false,
+        forward: false,
+      },
+      plugins: [setterPlugin, readerPlugin],
+    });
+
+    const setResponse = await app.request('/debug/runtime/set', { method: 'POST' });
+    expect(setResponse.status).toBe(200);
+
+    const readResponse = await app.request('/debug/runtime/state');
+    const readBody = (await readResponse.json()) as {
+      loginEnv: string | null;
+      target: string | null;
+      configCenterHost: string | null;
+      tenant: string | null;
+      cookies: Record<string, string>;
+      updatedAt: string | null;
+    };
+
+    expect(readResponse.status).toBe(200);
+    expect(readBody.loginEnv).toBe('daily');
+    expect(readBody.target).toBe('https://daily.example.com');
+    expect(readBody.configCenterHost).toBe('https://config.daily.example.com');
+    expect(readBody.tenant).toBe('cn');
+    expect(readBody.cookies).toEqual({ session: 'abc' });
+    expect(typeof readBody.updatedAt).toBe('string');
+
+    const clearResponse = await app.request('/debug/runtime/clear', { method: 'POST' });
+    const clearBody = (await clearResponse.json()) as {
+      loginEnv: string | null;
+      cookies: Record<string, string>;
+      updatedAt: string | null;
+    };
+
+    expect(clearResponse.status).toBe(200);
+    expect(clearBody.loginEnv).toBeNull();
+    expect(clearBody.cookies).toEqual({});
+    expect(typeof clearBody.updatedAt).toBe('string');
   });
 });

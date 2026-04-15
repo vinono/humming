@@ -2,12 +2,13 @@ import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { ZodError } from 'zod';
 import { parseEnv, type AppEnv } from '../config/env';
-import { createForwardProxy } from '../forward/proxy';
+import { createFetchForwardTransport, createForwardProxy } from '../forward/proxy';
 import { createLogger, type AppLogger } from '../logger';
 import { requestIdMiddleware } from '../middleware/request-id';
 import { createOptionsRoutes } from '../options/routes';
 import { createOptionsService } from '../options/service';
 import { createHealthRoutes } from '../routes/health';
+import { createLocalDebugRuntime } from '../runtime/local-debug';
 import type { AppBindings } from '../types';
 import type { CreateAppOptions, HummingBuiltins, HummingPlugin, HummingPluginContext, HummingServices } from './types';
 
@@ -39,7 +40,18 @@ function createServices(appEnv: AppEnv, services?: Partial<HummingServices>): Hu
         blockPrivateIp: appEnv.FORWARD_BLOCK_PRIVATE_IP,
         fallbackTarget: appEnv.FORWARD_FALLBACK_TARGET,
         rulesJson: appEnv.FORWARD_RULES,
+        defaultTransport: appEnv.FORWARD_TRANSPORT,
+        transports: {
+          fetch: createFetchForwardTransport(),
+          'retry-fetch': createFetchForwardTransport({
+            retry: {
+              maxAttempts: appEnv.FORWARD_TRANSPORT_RETRY_MAX_ATTEMPTS,
+              delayMs: appEnv.FORWARD_TRANSPORT_RETRY_DELAY_MS,
+            },
+          }),
+        },
       }),
+    localDebugRuntime: services?.localDebugRuntime ?? createLocalDebugRuntime(),
   };
 }
 
@@ -129,11 +141,13 @@ function buildBaseApp(options: CreateAppOptions) {
   const appLogger = options.logger ?? createLogger({ level: appEnv.LOG_LEVEL });
   const builtins = mergeBuiltins(options.builtins);
   const services = createServices(appEnv, options.services);
-  const plugins = options.plugins ?? [];
+  const pluginResolution = resolvePlugins(options.plugins ?? [], appEnv);
+  const plugins = pluginResolution.enabled;
   const app = new Hono<AppBindings>();
 
   app.use('*', requestIdMiddleware);
   installErrorHandling(app, appEnv, appLogger, builtins);
+  logPluginResolution(appLogger, pluginResolution, appEnv);
 
   const pluginContext = createPluginContext(app, appEnv, appLogger, services);
 
@@ -146,6 +160,116 @@ function buildBaseApp(options: CreateAppOptions) {
     plugins,
     pluginContext,
   };
+}
+
+function isPluginEnabled(plugin: HummingPlugin, appEnv: AppEnv) {
+  const mode = plugin.meta?.mode;
+
+  if (!mode || mode === 'all') {
+    return true;
+  }
+
+  if (Array.isArray(mode)) {
+    return mode.includes(appEnv.NODE_ENV);
+  }
+
+  return mode === appEnv.NODE_ENV;
+}
+
+function comparePlugins(left: { plugin: HummingPlugin; index: number }, right: { plugin: HummingPlugin; index: number }) {
+  const leftPriority = left.plugin.meta?.priority ?? 0;
+  const rightPriority = right.plugin.meta?.priority ?? 0;
+
+  if (leftPriority !== rightPriority) {
+    return rightPriority - leftPriority;
+  }
+
+  return left.index - right.index;
+}
+
+function resolvePlugins(plugins: HummingPlugin[], appEnv: AppEnv) {
+  const candidates = plugins
+    .map((plugin, index) => ({ plugin, index }))
+    .map((entry) => ({
+      ...entry,
+      enabled: isPluginEnabled(entry.plugin, appEnv),
+    }));
+
+  const enabledEntries = candidates.filter((entry) => entry.enabled).sort(comparePlugins);
+  const skippedEntries = candidates
+    .filter((entry) => !entry.enabled)
+    .map(({ plugin }) => ({
+      name: plugin.name,
+      reason: 'mode',
+      requestedMode: plugin.meta?.mode ?? 'all',
+    }));
+  const enabledPlugins = enabledEntries.map(({ plugin }) => plugin);
+
+  validatePluginGraph(enabledPlugins);
+
+  return {
+    enabled: enabledPlugins,
+    skipped: skippedEntries,
+  };
+}
+
+function describePlugin(plugin: HummingPlugin) {
+  const debugLabel = plugin.meta?.debugLabel?.trim();
+  return debugLabel ? `${plugin.name} (${debugLabel})` : plugin.name;
+}
+
+function validatePluginGraph(plugins: HummingPlugin[]) {
+  const seenNames = new Set<string>();
+
+  for (const plugin of plugins) {
+    if (seenNames.has(plugin.name)) {
+      throw new Error(`Duplicate plugin name detected: "${plugin.name}"`);
+    }
+    seenNames.add(plugin.name);
+  }
+
+  for (const plugin of plugins) {
+    for (const dependency of plugin.meta?.dependencies ?? []) {
+      if (!seenNames.has(dependency)) {
+        throw new Error(`Plugin "${describePlugin(plugin)}" depends on missing plugin "${dependency}".`);
+      }
+    }
+
+    for (const conflict of plugin.meta?.conflicts ?? []) {
+      if (seenNames.has(conflict)) {
+        throw new Error(`Plugin "${describePlugin(plugin)}" conflicts with enabled plugin "${conflict}".`);
+      }
+    }
+  }
+}
+
+function logPluginResolution(
+  appLogger: AppLogger,
+  pluginResolution: {
+    enabled: HummingPlugin[];
+    skipped: Array<{ name: string; reason: string; requestedMode: unknown }>;
+  },
+  appEnv: AppEnv
+) {
+  if (pluginResolution.enabled.length === 0 && pluginResolution.skipped.length === 0) {
+    return;
+  }
+
+  appLogger.info(
+    {
+      nodeEnv: appEnv.NODE_ENV,
+      enabledPlugins: pluginResolution.enabled.map((plugin) => ({
+        name: plugin.name,
+        priority: plugin.meta?.priority ?? 0,
+        mode: plugin.meta?.mode ?? 'all',
+        debugLabel: plugin.meta?.debugLabel ?? null,
+        dependencies: plugin.meta?.dependencies ?? [],
+        conflicts: plugin.meta?.conflicts ?? [],
+      })),
+      skippedPlugins: pluginResolution.skipped,
+    },
+    'plugins resolved'
+  );
 }
 
 function installBuiltins(
@@ -189,7 +313,7 @@ export function createAppSync(options: CreateAppOptions = {}) {
   for (const plugin of runtime.plugins) {
     const result = plugin.setup(runtime.pluginContext);
     if (result instanceof Promise) {
-      throw new Error(`Plugin "${plugin.name}" is async. use createApp() instead of createAppSync().`);
+      throw new Error(`Plugin "${describePlugin(plugin)}" is async. use createApp() instead of createAppSync().`);
     }
   }
 

@@ -35,6 +35,7 @@ Current repository snapshot on 2026-04-08:
 - [ ] run `bun run build`
 - [ ] run `bun run test:entry`
 - [ ] run `bun run test:consumer`
+- [ ] run `bun run test:examples`
 - [ ] run `bun test`
 - [ ] smoke run examples:
   - [ ] `bun run example:basic`
@@ -88,6 +89,7 @@ Use this section only if you want to publish to npm.
 - [ ] smoke test package consumption in a fresh Bun project
 - [ ] verify the package root import does not eagerly create an app or validate `Bun.env`
 - [ ] verify `exports`, `main`, `module`, and `types` all point at `dist/`
+- [ ] verify the published `bin` entry can run `humming init demo-app`
 
 ## 6. Release Notes
 

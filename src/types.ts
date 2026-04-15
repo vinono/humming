@@ -12,5 +12,6 @@ export type AppBindings = {
     requestId: string;
     startAt: number;
     authUser: AuthUser | null;
+    localDebugRuntimeApplied: boolean;
   };
 };

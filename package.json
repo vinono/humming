@@ -2,6 +2,9 @@
   "name": "humming",
   "version": "0.1.0",
   "description": "Plugin-first lightweight BFF core for Bun with routes, options, and forward hooks.",
+  "bin": {
+    "humming": "./dist/src/cli/index.js"
+  },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -40,6 +43,7 @@
     "LICENSE-APACHE"
   ],
   "scripts": {
+    "benchmark:forward": "bun scripts/benchmark-forward.ts",
     "build": "tsc -p tsconfig.build.json",
     "dev": "bun --watch src/main.ts",
     "prepack": "bun run build",
@@ -49,6 +53,7 @@
     "example:with-plugins": "bun examples/with-plugins/main.ts",
     "test:consumer": "bun test consumer.test.ts",
     "test:entry": "bun test index.test.ts",
+    "test:examples": "bash scripts/smoke-examples.sh",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
     "example:with-forward": "bun examples/with-forward/main.ts"

@@ -20,6 +20,12 @@ Run the main plugin example:
 bun run example:with-plugins
 ```
 
+Scaffold a new project:
+
+```bash
+bunx humming init my-bff --template with-plugins
+```
+
 Try the core flows:
 
 ```bash
@@ -60,6 +66,18 @@ What you should see:
 - not a full API gateway replacement
 - not a large backend application framework
 - not an all-in platform with hidden conventions
+
+## Documentation
+
+Start with the guide that matches your goal:
+
+- [Overview](./docs/overview.md): product positioning, architecture, and core boundaries
+- [Plugin System](./docs/plugin-system.md): extension model, governance, and plugin strategy
+- [CLI](./docs/cli.md): project scaffolding and template usage
+- [Transport](./docs/transport.md): transport strategies, retry policy, keepalive, and custom transport guidance
+- [Production](./docs/production.md): deployment and runtime guidance
+- [Benchmark](./docs/benchmark.md): local forward baseline and performance workflow
+- [Plugin Guide](./PLUGIN_GUIDE.md): authoring details and code-level examples
 
 ## Official Plugins
 
@@ -107,6 +125,52 @@ bun run example:with-plugins
 bun run example:with-forward
 bun run example:with-async-plugin
 ```
+
+## CLI
+
+`humming` also ships a Bun-first project scaffold CLI.
+
+Create a new app:
+
+```bash
+bunx humming init my-bff
+```
+
+Available templates:
+
+- `basic`
+- `with-plugins`
+- `with-forward`
+
+Example:
+
+```bash
+bunx humming init my-bff --template with-forward
+```
+
+If the target directory already contains files, pass `--force`.
+
+## Benchmark
+
+Run the local forward baseline:
+
+```bash
+bun run benchmark:forward
+```
+
+This benchmark starts a mock upstream and a local `humming` instance, then compares direct upstream requests against forwarded requests for both small JSON and larger binary payloads.
+
+Useful overrides:
+
+- `BENCH_CONCURRENCY`
+- `BENCH_SMALL_REQUESTS`
+- `BENCH_LARGE_REQUESTS`
+- `BENCH_STREAM_REQUESTS`
+- `BENCH_LARGE_BYTES`
+
+More detail:
+
+- `docs/benchmark.md`
 
 ## What Lives In Core
 
@@ -303,6 +367,32 @@ Detailed guide:
 
 - `PLUGIN_GUIDE.md`
 
+Optional metadata helps govern plugin behavior:
+
+```ts
+definePlugin({
+  name: 'dev-toolbar',
+  meta: {
+    priority: 100,
+    mode: 'development',
+    debugLabel: 'local-debug',
+    dependencies: ['request-logger'],
+    conflicts: ['legacy-toolbar'],
+  },
+  setup(context) {
+    // ...
+  },
+});
+```
+
+Metadata fields:
+
+- `priority`: higher numbers run earlier
+- `mode`: `development`, `test`, `production`, `all`, or an array of modes
+- `debugLabel`: readable label for debugging and error messages
+- `dependencies`: other plugin names that must also be enabled
+- `conflicts`: plugin names that cannot be enabled at the same time
+
 ## Core API
 
 Main exports:
@@ -472,6 +562,9 @@ Available hook registration methods:
 - `registerOnError()`
 - `registerHooks()`
 
+Forward logs now split execution timing into `beforeMatch`, `beforeRequest`, `upstream`, `afterResponse`, and `onError`, which makes it easier to separate hook cost from transport cost in local debugging and benchmarks.
+Startup logs also include resolved and skipped plugins, so dependency and mode issues are easier to spot before requests start flowing.
+
 Example:
 
 ```ts
@@ -498,6 +591,9 @@ Main environment variables:
 - `FORWARD_BLOCK_PRIVATE_IP`: block localhost and private forward targets
 - `FORWARD_FALLBACK_TARGET`: optional fallback upstream target
 - `FORWARD_RULES`: JSON string forward rules array
+- `FORWARD_TRANSPORT`: default forward transport strategy, default `fetch`
+- `FORWARD_TRANSPORT_RETRY_MAX_ATTEMPTS`: attempts used by the built-in `retry-fetch` strategy
+- `FORWARD_TRANSPORT_RETRY_DELAY_MS`: delay between `retry-fetch` attempts in milliseconds
 
 Example forward rules:
 
@@ -506,10 +602,158 @@ Example forward rules:
   {
     "prefix": "/api/backend",
     "target": "https://backend.example.com",
-    "stripPrefix": true,
-    "allowedMethods": ["GET", "POST"]
+    "transport": "retry-fetch",
+    "pathRewrite": "/v2",
+    "followRedirect": true,
+    "allowedMethods": ["GET", "POST"],
+    "requestHeaders": {
+      "x-service-name": "humming"
+    },
+    "responseHeaders": {
+      "cache-control": "no-store"
+    },
+    "acceptStatuses": [200, 201, 404]
   }
 ]
+```
+
+Forward rule fields:
+
+- `prefix`: request path prefix to match
+- `target`: upstream base URL
+- `transport`: optional named transport strategy; defaults to `FORWARD_TRANSPORT`
+- `stripPrefix`: remove the matched prefix before forwarding
+- `pathRewrite`: replace the matched prefix with a new path prefix
+- `preserveHost`: keep the original `host` header when forwarding
+- `followRedirect`: allow Bun `fetch` to follow upstream redirects instead of returning `30x` directly
+- `timeoutMs`: override the default forward timeout
+- `allowedMethods`: optional method allowlist
+- `stripRequestHeaders`: request headers removed before forwarding
+- `requestHeaders`: static request headers applied before forward hooks
+- `responseHeaders`: static response headers applied before response hooks
+- `acceptStatuses`: optional upstream status allowlist; statuses outside the list return `502`
+
+Notes:
+
+- `pathRewrite` is a prefix replacement, so `/api/backend/users` with `pathRewrite: "/v2"` becomes `/v2/users`
+- `pathRewrite` cannot be combined with `stripPrefix`
+- `preserveHost` is useful when upstream routing depends on the caller host
+- built-in transports are `fetch`, `keepalive-fetch`, and `retry-fetch`
+- `keepalive-fetch` is the explicit naming entry point when you want outgoing requests to set `keepalive: true`
+- `retry-fetch` is intended for idempotent requests and will only retry replayable request bodies
+- upstream transport failures are classified into timeout, dns, tls, connect, and generic network errors
+
+## Custom Transport
+
+You can register your own transport strategies when creating the app or the forward proxy.
+
+Example:
+
+```ts
+import {
+  createFetchForwardTransport,
+  createForwardProxy,
+  createKeepAliveForwardTransport,
+} from 'humming';
+
+const forwardProxy = createForwardProxy({
+  enabled: true,
+  defaultTimeoutMs: 15_000,
+  blockPrivateIp: true,
+  defaultTransport: 'hedged-fetch',
+  rulesJson: JSON.stringify([
+    {
+      prefix: '/api/search',
+      target: 'https://search.example.com',
+      transport: 'retry-fetch',
+    },
+    {
+      prefix: '/api/stream',
+      target: 'https://stream.example.com',
+      transport: 'keepalive-fetch',
+    },
+  ]),
+  transports: {
+    'keepalive-fetch': createKeepAliveForwardTransport(),
+    'retry-fetch': createFetchForwardTransport({
+      retry: {
+        maxAttempts: 3,
+        delayMs: 100,
+        backoff: 'exponential',
+        statuses: [429, 503],
+        categoryDelayMs: {
+          timeout: 250,
+          connect: 150,
+        },
+      },
+    }),
+    'hedged-fetch': {
+      async execute(input) {
+        const response = await fetch(input.upstreamUrl, {
+          method: input.requestMethod,
+          headers: input.headers,
+          body: input.body,
+          redirect: input.redirect,
+          signal: input.signal,
+        });
+
+        return {
+          response,
+          attempts: 1,
+        };
+      },
+    },
+  },
+});
+```
+
+Retry policy controls available in `createFetchForwardTransport({ retry })`:
+
+- `maxAttempts`
+- `delayMs`
+- `maxDelayMs`
+- `backoff`: `fixed`, `linear`, or `exponential`
+- `methods`
+- `statuses`
+- `categories`
+- `statusDelayMs`
+- `categoryDelayMs`
+- `shouldRetry(context)`
+- `getDelayMs(context)`
+
+## Local Debug Runtime
+
+`humming` now exposes a shared in-memory `localDebugRuntime` service so plugins can coordinate local login state, target switching, and cookie injection without each plugin owning a separate file or cache.
+
+Available methods:
+
+- `getRuntimeState()`
+- `setRuntimeState()`
+- `clearRuntimeState()`
+
+Default state shape:
+
+```ts
+{
+  loginEnv: null,
+  target: null,
+  configCenterHost: null,
+  tenant: null,
+  cookies: {},
+  updatedAt: null,
+}
+```
+
+Typical plugin usage:
+
+```ts
+services.localDebugRuntime.setRuntimeState({
+  loginEnv: 'daily',
+  target: 'https://daily.example.com',
+  cookies: {
+    session: 'abc',
+  },
+});
 ```
 
 ## Development
@@ -538,6 +782,12 @@ Smoke test package consumption from a fresh Bun project using the packed tarball
 bun run test:consumer
 ```
 
+Smoke test the runnable examples:
+
+```bash
+bun run test:examples
+```
+
 Run tests:
 
 ```bash
@@ -555,15 +805,25 @@ Release prep:
 - `RELEASE_CHECKLIST.md`
 - `CHANGELOG.md`
 - `RELEASE_NOTES_v0.1.0.md`
+- `CONTRIBUTING.md`
+- `docs/production.md`
 
 ## Repository Structure
 
 - `src/core`: app runtime and plugin model
+- `src/cli`: project scaffold command and templates
 - `src/options`: option registry, providers, routes
 - `src/forward`: forward proxy and hooks
+- `src/runtime`: shared local debug runtime primitives
 - `src/plugins`: official plugins
 - `examples`: runnable examples
+- `docs/README.md`: documentation entrypoint
+- `docs/overview.md`: product and architecture overview
+- `docs/plugin-system.md`: plugin system overview and design notes
+- `docs/cli.md`: scaffold CLI guide
+- `docs/production.md`: production deployment guidance
 - `PLUGIN_GUIDE.md`: plugin authoring guide
+- `CONTRIBUTING.md`: contribution workflow and quality gate
 - `RELEASE_CHECKLIST.md`: first-release and publish checklist
 - `CHANGELOG.md`: project change history
 - `RELEASE_NOTES_v0.1.0.md`: first GitHub release notes draft

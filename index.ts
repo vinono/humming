@@ -3,6 +3,8 @@ export * from './src/config/env';
 export type {
   CreateAppOptions,
   HummingBuiltins,
+  HummingPluginMeta,
+  HummingPluginMode,
   HummingPlugin,
   HummingPluginContext,
   HummingServices,
@@ -17,5 +19,6 @@ export * from './src/options/providers/static';
 export * from './src/options/service';
 export * from './src/options/types';
 export * from './src/plugins';
+export * from './src/runtime';
 export * from './src/routes/health';
 export * from './src/types';
