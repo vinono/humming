@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./assets/brand/humming-logo.svg" alt="humming logo" width="560" />
+  <img src="./assets/brand/humming-logo-readme.svg" alt="humming logo" width="560" />
 </p>
 
 <p align="center"><strong>Plugin-first lightweight BFF core for Bun.</strong></p>

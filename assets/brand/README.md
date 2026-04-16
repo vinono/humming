@@ -5,6 +5,7 @@ This folder contains the current brand kit for `humming`.
 ## Files
 
 - `humming-logo.svg`: Horizontal primary logo for docs, headers, and release visuals.
+- `humming-logo-readme.svg`: High-contrast horizontal logo variant tuned for GitHub README dark backgrounds.
 - `humming-mark.svg`: Standalone mark for avatars, favicons, app icons, and badges.
 
 ## Brand Direction

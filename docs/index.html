@@ -3,14 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>humming Docs</title>
+    <title data-i18n="meta.title">humming Docs</title>
     <meta
       name="description"
       content="Documentation entry for humming: overview, plugin system, CLI, transport, production, benchmark, and plugin authoring guides."
+      data-i18n="meta.description"
+      data-i18n-attr="content"
     />
     <link rel="stylesheet" href="../site/styles.css" />
+    <script defer src="../site/i18n.js"></script>
   </head>
-  <body class="page-shell docs-shell">
+  <body class="page-shell docs-shell" data-page="docs">
     <div class="site-backdrop" aria-hidden="true">
       <div class="glow glow-cyan"></div>
       <div class="glow glow-amber"></div>
@@ -18,99 +21,117 @@
     </div>
 
     <header class="topbar">
-      <a class="brand-lockup" href="../index.html" aria-label="humming home">
+      <a
+        class="brand-lockup"
+        href="../index.html"
+        aria-label="humming home"
+        data-i18n="brand.homeAria"
+        data-i18n-attr="aria-label"
+      >
         <img
           src="../assets/brand/humming-mark.svg"
           alt=""
           width="40"
           height="40"
         />
-        <span>humming docs</span>
+        <span data-i18n="brand.docs">humming docs</span>
       </a>
-      <nav class="topnav">
-        <a href="../index.html">Home</a>
-        <a href="../README.md">README</a>
-        <a href="https://github.com/vinono/humming">GitHub</a>
-      </nav>
+      <div class="topbar-controls">
+        <nav class="topnav">
+          <a href="../index.html" data-i18n="nav.home">Home</a>
+          <a href="../README.md" data-i18n="nav.readme">README</a>
+          <a href="https://github.com/vinono/humming" data-i18n="nav.github">GitHub</a>
+        </nav>
+        <div
+          class="lang-switch"
+          role="group"
+          aria-label="Language switch"
+          data-i18n="lang.switchLabel"
+          data-i18n-attr="aria-label"
+        >
+          <button type="button" class="lang-button" data-lang-switch="en">EN</button>
+          <button type="button" class="lang-button" data-lang-switch="zh">中文</button>
+        </div>
+      </div>
     </header>
 
     <main>
       <section class="hero panel docs-hero">
         <div class="hero-copy">
-          <p class="eyebrow">Documentation entry</p>
-          <h1>Find the shortest path from evaluation to implementation.</h1>
-          <p class="lede">
+          <p class="eyebrow" data-i18n="hero.eyebrow">Documentation entry</p>
+          <h1 data-i18n="hero.title">Find the shortest path from evaluation to implementation.</h1>
+          <p class="lede" data-i18n="hero.lede">
             This page is the entry point for the current `humming` docs set.
             The detailed guides still live in Markdown so they stay close to the
             codebase and version history.
           </p>
         </div>
         <div class="hero-card compact-card">
-          <p class="mini-label">Recommended reading paths</p>
+          <p class="mini-label" data-i18n="hero.pathsLabel">Recommended reading paths</p>
           <ul class="route-list">
-            <li><strong>Evaluating humming:</strong> overview → README → plugin system</li>
-            <li><strong>Starting a new app:</strong> CLI → examples → production</li>
-            <li><strong>Tuning forward:</strong> transport → benchmark → production</li>
-            <li><strong>Building extensions:</strong> plugin system → plugin guide</li>
+            <li data-i18n="hero.pathOne" data-i18n-mode="html"><strong>Evaluating humming:</strong> overview → README → plugin system</li>
+            <li data-i18n="hero.pathTwo" data-i18n-mode="html"><strong>Starting a new app:</strong> CLI → examples → production</li>
+            <li data-i18n="hero.pathThree" data-i18n-mode="html"><strong>Tuning forward:</strong> transport → benchmark → production</li>
+            <li data-i18n="hero.pathFour" data-i18n-mode="html"><strong>Building extensions:</strong> plugin system → plugin guide</li>
           </ul>
         </div>
       </section>
 
       <section class="section-block">
         <div class="section-heading">
-          <p class="eyebrow">Core guides</p>
-          <h2>Read the architecture and runtime boundaries first.</h2>
+          <p class="eyebrow" data-i18n="core.eyebrow">Core guides</p>
+          <h2 data-i18n="core.title">Read the architecture and runtime boundaries first.</h2>
         </div>
         <div class="doc-grid">
           <a class="doc-card" href="./overview.md">
-            <h3>Overview</h3>
-            <p>Positioning, architecture, core boundaries, and when `humming` is the right fit.</p>
+            <h3 data-i18n="core.overview.title">Overview</h3>
+            <p data-i18n="core.overview.body">Positioning, architecture, core boundaries, and when `humming` is the right fit.</p>
           </a>
           <a class="doc-card" href="./plugin-system.md">
-            <h3>Plugin system</h3>
-            <p>Extension model, governance direction, execution order, and growth strategy.</p>
+            <h3 data-i18n="core.plugin.title">Plugin system</h3>
+            <p data-i18n="core.plugin.body">Extension model, governance direction, execution order, and growth strategy.</p>
           </a>
           <a class="doc-card" href="./transport.md">
-            <h3>Transport</h3>
-            <p>Forward transport strategies, keepalive, retry policy, and custom transport hooks.</p>
+            <h3 data-i18n="core.transport.title">Transport</h3>
+            <p data-i18n="core.transport.body">Forward transport strategies, keepalive, retry policy, and custom transport hooks.</p>
           </a>
           <a class="doc-card" href="./production.md">
-            <h3>Production</h3>
-            <p>Runtime setup, operational concerns, and how to keep the service predictable.</p>
+            <h3 data-i18n="core.production.title">Production</h3>
+            <p data-i18n="core.production.body">Runtime setup, operational concerns, and how to keep the service predictable.</p>
           </a>
         </div>
       </section>
 
       <section class="section-block">
         <div class="section-heading">
-          <p class="eyebrow">Tooling guides</p>
-          <h2>Use the CLI and benchmark docs when you want to move quickly.</h2>
+          <p class="eyebrow" data-i18n="tooling.eyebrow">Tooling guides</p>
+          <h2 data-i18n="tooling.title">Use the CLI and benchmark docs when you want to move quickly.</h2>
         </div>
         <div class="doc-grid">
           <a class="doc-card" href="./cli.md">
-            <h3>CLI</h3>
-            <p>Scaffold apps from templates and standardize local project bootstrapping.</p>
+            <h3 data-i18n="tooling.cli.title">CLI</h3>
+            <p data-i18n="tooling.cli.body">Scaffold apps from templates and standardize local project bootstrapping.</p>
           </a>
           <a class="doc-card" href="./benchmark.md">
-            <h3>Benchmark</h3>
-            <p>Measure the forward baseline and compare direct upstream calls with proxied traffic.</p>
+            <h3 data-i18n="tooling.benchmark.title">Benchmark</h3>
+            <p data-i18n="tooling.benchmark.body">Measure the forward baseline and compare direct upstream calls with proxied traffic.</p>
           </a>
           <a class="doc-card" href="../PLUGIN_GUIDE.md">
-            <h3>Plugin guide</h3>
-            <p>Code-level authoring details, examples, and patterns for building custom plugins.</p>
+            <h3 data-i18n="tooling.guide.title">Plugin guide</h3>
+            <p data-i18n="tooling.guide.body">Code-level authoring details, examples, and patterns for building custom plugins.</p>
           </a>
           <a class="doc-card" href="../README.md">
-            <h3>Repository README</h3>
-            <p>Main project landing page with quick start, official plugins, and examples.</p>
+            <h3 data-i18n="tooling.readme.title">Repository README</h3>
+            <p data-i18n="tooling.readme.body">Main project landing page with quick start, official plugins, and examples.</p>
           </a>
         </div>
       </section>
 
       <section class="section-block panel split-panel">
         <div>
-          <p class="eyebrow">Examples</p>
-          <h2>Map the docs to runnable templates.</h2>
-          <p class="section-copy">
+          <p class="eyebrow" data-i18n="examples.eyebrow">Examples</p>
+          <h2 data-i18n="examples.title">Map the docs to runnable templates.</h2>
+          <p class="section-copy" data-i18n="examples.body">
             The examples folder is the fastest way to move from concepts to a
             running app. Use the matching example after each guide instead of
             trying to absorb everything at once.
@@ -126,11 +147,11 @@
     </main>
 
     <footer class="footer">
-      <p>Detailed docs live in versioned Markdown files inside this repository.</p>
+      <p data-i18n="footer.tagline">Detailed docs live in versioned Markdown files inside this repository.</p>
       <div class="footer-links">
-        <a href="../index.html">Home</a>
-        <a href="../README.md">README</a>
-        <a href="https://github.com/vinono/humming/tree/main/docs">Docs Folder</a>
+        <a href="../index.html" data-i18n="footer.home">Home</a>
+        <a href="../README.md" data-i18n="footer.readme">README</a>
+        <a href="https://github.com/vinono/humming/tree/main/docs" data-i18n="footer.docsFolder">Docs Folder</a>
       </div>
     </footer>
   </body>

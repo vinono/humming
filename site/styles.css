@@ -138,10 +138,49 @@ main,
   font-size: 0.96rem;
 }
 
+.topbar-controls {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: flex-end;
+}
+
+.lang-switch {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(121, 217, 255, 0.18);
+  border-radius: 999px;
+  display: inline-flex;
+  gap: 6px;
+  padding: 4px;
+}
+
+.lang-button {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  color: var(--text-soft);
+  cursor: pointer;
+  font-family:
+    "IBM Plex Mono",
+    "SFMono-Regular",
+    monospace;
+  font-size: 0.82rem;
+  padding: 8px 11px;
+}
+
+.lang-button.is-active {
+  background: rgba(121, 217, 255, 0.14);
+  color: var(--text);
+}
+
 .topnav a:hover,
 .footer a:hover,
 .doc-card:hover,
-.button:hover {
+.button:hover,
+.lang-button:hover {
   opacity: 0.92;
 }
 
@@ -727,6 +766,11 @@ main {
     align-items: flex-start;
     flex-direction: column;
     gap: 12px;
+  }
+
+  .topbar-controls {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .hero {
