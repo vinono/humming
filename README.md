@@ -6,6 +6,17 @@
 
 `humming` is a thin, explicit BFF kernel for frontend teams and small platform teams that want local routes, options, and forwarding without adopting a heavyweight backend framework or full API gateway.
 
+Static site entry points:
+
+- `./index.html`: project landing page
+- `./docs/index.html`: documentation entry
+
+GitHub Pages:
+
+- `.github/workflows/pages.yml` publishes the static entry pages
+- `bun run build:pages` prepares the deployable `.pages/` artifact
+- in repository `Settings -> Pages`, set the source to `GitHub Actions`
+
 ## Quick Start
 
 Install dependencies:

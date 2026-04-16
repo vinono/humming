@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>humming | Plugin-first lightweight BFF core for Bun</title>
+    <meta
+      name="description"
+      content="humming is a plugin-first lightweight BFF core for Bun. Start with health, options, and forward, then extend with plugins and a Bun-first CLI."
+    />
+    <link rel="stylesheet" href="./site/styles.css" />
+  </head>
+  <body class="page-shell">
+    <div class="site-backdrop" aria-hidden="true">
+      <div class="glow glow-cyan"></div>
+      <div class="glow glow-amber"></div>
+      <div class="grid-noise"></div>
+    </div>
+
+    <header class="topbar">
+      <a class="brand-lockup" href="./index.html" aria-label="humming home">
+        <img
+          src="./assets/brand/humming-mark.svg"
+          alt=""
+          width="40"
+          height="40"
+        />
+        <span>humming</span>
+      </a>
+      <nav class="topnav">
+        <a href="#use-cases">Use Cases</a>
+        <a href="#ecosystem">Ecosystem</a>
+        <a href="#cli">CLI</a>
+        <a href="#docs">Docs</a>
+        <a href="./README.md">README</a>
+        <a href="https://github.com/vinono/humming">GitHub</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero panel">
+        <div class="hero-copy">
+          <div class="hero-ribbon">
+            <span class="ribbon-dot"></span>
+            <span>v0.1.0</span>
+            <span class="ribbon-separator">/</span>
+            <span>Bun-first BFF core</span>
+          </div>
+          <p class="eyebrow">Thin BFF kernel for frontend-owned backends</p>
+          <h1>Build a small BFF on Bun without dragging in a full backend framework.</h1>
+          <p class="lede">
+            `humming` keeps the core deliberately narrow: `health`, `options`,
+            and `forward`. Everything else stays composable through plugins,
+            hooks, and explicit runtime configuration.
+          </p>
+          <div class="cta-row">
+            <a class="button button-primary" href="./docs/index.html">Open Docs</a>
+            <a class="button button-secondary" href="https://github.com/vinono/humming">View on GitHub</a>
+          </div>
+          <div class="hero-pills" aria-label="project highlights">
+            <span>Bun-first</span>
+            <span>Plugin-first</span>
+            <span>CLI included</span>
+            <span>Transport-aware forward</span>
+          </div>
+          <div class="hero-stats" aria-label="project stats">
+            <article>
+              <strong>3</strong>
+              <span>core built-ins</span>
+            </article>
+            <article>
+              <strong>8</strong>
+              <span>official plugins</span>
+            </article>
+            <article>
+              <strong>3</strong>
+              <span>starter templates</span>
+            </article>
+            <article>
+              <strong>1</strong>
+              <span>clear boundary</span>
+            </article>
+          </div>
+        </div>
+
+        <div class="hero-card">
+          <p class="mini-label">Quick start</p>
+          <pre><code>bunx humming init my-bff --template with-forward
+cd my-bff
+bun install
+bun run dev</code></pre>
+          <div class="mini-console">
+            <p class="mini-label">What you get</p>
+            <div class="console-lines">
+              <span>+ health endpoint</span>
+              <span>+ options routes</span>
+              <span>+ forward rules</span>
+              <span>+ plugin-ready app shell</span>
+            </div>
+          </div>
+          <div class="mini-grid">
+            <article>
+              <h2>Core stays small</h2>
+              <p>Keep `health`, `options`, and `forward` in core and move optional behavior into plugins.</p>
+            </article>
+            <article>
+              <h2>Scale by composition</h2>
+              <p>Add auth, cache, metrics, rate limit, or custom routes only where the project actually needs them.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-block">
+        <div class="section-heading">
+          <p class="eyebrow">Where it fits</p>
+          <h2>Built for thin BFFs, local proxy layers, and frontend teams that want control.</h2>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card">
+            <h3>Good fit</h3>
+            <ul>
+              <li>project-level BFFs</li>
+              <li>local routes and small aggregations</li>
+              <li>upstream forwarding with explicit hooks</li>
+              <li>frontend-owned runtime extensions</li>
+            </ul>
+          </article>
+          <article class="feature-card">
+            <h3>Not trying to be</h3>
+            <ul>
+              <li>a full API gateway</li>
+              <li>a heavy backend application framework</li>
+              <li>a hidden-convention platform</li>
+              <li>an everything-in-core runtime</li>
+            </ul>
+          </article>
+          <article class="feature-card">
+            <h3>Key runtime ideas</h3>
+            <ul>
+              <li>plugin-first extension model</li>
+              <li>explicit forward transport strategy</li>
+              <li>shared services across plugins</li>
+              <li>small surface area with readable behavior</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="section-block" id="use-cases">
+        <div class="section-heading">
+          <p class="eyebrow">Use cases</p>
+          <h2>Use it where teams need a thin edge layer, not a giant backend surface.</h2>
+        </div>
+        <div class="use-case-grid">
+          <article class="use-case-card">
+            <span class="token">frontend-owned bff</span>
+            <h3>Ship a small backend the frontend team can actually maintain.</h3>
+            <p>
+              Add local routes, option endpoints, auth guards, and upstream forwarding
+              without pulling the project into a controller-heavy backend stack.
+            </p>
+          </article>
+          <article class="use-case-card">
+            <span class="token">local proxy layer</span>
+            <h3>Replace ad hoc dev proxy files with something operationally clearer.</h3>
+            <p>
+              Keep request shaping, transport selection, metrics, and runtime hooks in
+              one readable service that still feels lightweight.
+            </p>
+          </article>
+          <article class="use-case-card">
+            <span class="token">thin aggregation edge</span>
+            <h3>Expose a few composed endpoints without pretending this is a giant platform.</h3>
+            <p>
+              Start with small aggregation and request rewriting work close to the UI,
+              then grow through plugins only where the project really needs it.
+            </p>
+          </article>
+          <article class="use-case-card">
+            <span class="token">team starter kernel</span>
+            <h3>Give multiple projects the same BFF baseline without copying proxy glue everywhere.</h3>
+            <p>
+              Use the CLI, examples, and official plugins to standardize a small but
+              consistent runtime across apps.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section-block panel">
+        <div class="section-heading">
+          <p class="eyebrow">Core surface</p>
+          <h2>Three built-ins, then extension points.</h2>
+        </div>
+        <div class="core-grid">
+          <article class="core-card">
+            <span class="token">health</span>
+            <p>Simple runtime health endpoint that stays public and predictable.</p>
+          </article>
+          <article class="core-card">
+            <span class="token">options</span>
+            <p>Serve dictionaries and option data from static or HTTP-backed providers.</p>
+          </article>
+          <article class="core-card">
+            <span class="token">forward</span>
+            <p>Shape and proxy upstream requests with route rules, hooks, and transport strategy selection.</p>
+          </article>
+        </div>
+        <div class="architecture-strip">
+          <span>client</span>
+          <span class="arrow">→</span>
+          <span>humming core</span>
+          <span class="arrow">→</span>
+          <span>plugins</span>
+          <span class="arrow">→</span>
+          <span>upstream services</span>
+        </div>
+      </section>
+
+      <section class="section-block panel ecosystem-panel" id="ecosystem">
+        <div class="section-heading">
+          <p class="eyebrow">Plugin ecosystem</p>
+          <h2>Grow outward from a stable kernel instead of stuffing optional behavior into core.</h2>
+        </div>
+        <div class="ecosystem-grid">
+          <div class="ecosystem-column">
+            <p class="mini-label">Official plugins</p>
+            <div class="plugin-cards">
+              <article class="plugin-card">
+                <h3>Auth</h3>
+                <p>Protect routes with bearer checks, JWT validation, and role-based rules.</p>
+              </article>
+              <article class="plugin-card">
+                <h3>Cache</h3>
+                <p>Cache eligible responses with memory or Redis-backed stores.</p>
+              </article>
+              <article class="plugin-card">
+                <h3>Metrics</h3>
+                <p>Expose Prometheus-style request metrics close to the BFF edge.</p>
+              </article>
+              <article class="plugin-card">
+                <h3>Rate limit</h3>
+                <p>Enforce request ceilings per route, user, or custom key strategy.</p>
+              </article>
+              <article class="plugin-card">
+                <h3>CORS</h3>
+                <p>Handle browser-facing preflight and cross-origin policy cleanly.</p>
+              </article>
+              <article class="plugin-card">
+                <h3>Options</h3>
+                <p>Register static and HTTP-backed option sources without cluttering app code.</p>
+              </article>
+            </div>
+          </div>
+          <div class="ecosystem-column ecosystem-story">
+            <p class="mini-label">Extension strategy</p>
+            <div class="story-stack">
+              <article>
+                <h3>Start with official building blocks</h3>
+                <p>Use the shipped plugins for common operational needs instead of inventing one-off middleware in every project.</p>
+              </article>
+              <article>
+                <h3>Add custom project plugins</h3>
+                <p>Register local routes, middleware, option sources, and forward hooks through the same explicit runtime model.</p>
+              </article>
+              <article>
+                <h3>Leave room for a future ecosystem</h3>
+                <p>`humming` is already shaped for external plugins and presets, but the kernel stays small so the ecosystem can grow without making core fuzzy.</p>
+              </article>
+            </div>
+            <div class="ecosystem-path">
+              <span>core</span>
+              <span class="arrow">→</span>
+              <span>official plugins</span>
+              <span class="arrow">→</span>
+              <span>custom plugins</span>
+              <span class="arrow">→</span>
+              <span>future presets</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-block cli-showcase" id="cli">
+        <div class="section-heading">
+          <p class="eyebrow">CLI</p>
+          <h2>Go from empty folder to a working BFF skeleton in one command.</h2>
+        </div>
+        <div class="cli-grid">
+          <article class="cli-card cli-terminal">
+            <p class="mini-label">Scaffold</p>
+            <pre><code>bunx humming init acme-bff --template with-plugins
+
+Created acme-bff with the "with-plugins" template.
+
+Next steps:
+  cd acme-bff
+  bun install
+  bun run dev</code></pre>
+          </article>
+          <article class="cli-card cli-layout">
+            <p class="mini-label">Template shape</p>
+            <pre><code>acme-bff/
+  src/
+    main.ts
+  package.json
+  README.md
+  .env.example</code></pre>
+          </article>
+          <article class="cli-card cli-templates">
+            <p class="mini-label">Templates</p>
+            <div class="template-list">
+              <div>
+                <span class="token">basic</span>
+                <p>Smallest useful app with core built-ins only.</p>
+              </div>
+              <div>
+                <span class="token">with-plugins</span>
+                <p>Auth, cache, metrics, rate limit, options, and a custom plugin route.</p>
+              </div>
+              <div>
+                <span class="token">with-forward</span>
+                <p>Forward rules plus request and response hook examples.</p>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section-block" id="docs">
+        <div class="section-heading">
+          <p class="eyebrow">Documentation</p>
+          <h2>Start from the entry that matches the job at hand.</h2>
+        </div>
+        <div class="doc-grid">
+          <a class="doc-card" href="./docs/index.html">
+            <h3>Docs portal</h3>
+            <p>Single entry point for overview, plugin system, CLI, transport, production, and benchmark guides.</p>
+          </a>
+          <a class="doc-card" href="./docs/overview.md">
+            <h3>Overview</h3>
+            <p>Positioning, architecture boundaries, and how the core is meant to stay small.</p>
+          </a>
+          <a class="doc-card" href="./docs/transport.md">
+            <h3>Transport</h3>
+            <p>Keepalive, retry policy, and custom transport strategy boundaries.</p>
+          </a>
+          <a class="doc-card" href="./docs/cli.md">
+            <h3>CLI</h3>
+            <p>Scaffold a new app quickly with the Bun-first starter templates.</p>
+          </a>
+        </div>
+      </section>
+
+      <section class="section-block panel split-panel">
+        <div>
+          <p class="eyebrow">Plugin-first growth</p>
+          <h2>Keep operational behavior out of core until you actually need it.</h2>
+          <p class="section-copy">
+            The official plugins already cover auth, cache, CORS, metrics, rate
+            limiting, request logging, and options providers. That keeps the
+            kernel narrow while still giving teams a practical way to grow.
+          </p>
+        </div>
+        <div class="plugin-tags">
+          <span>auth</span>
+          <span>cache</span>
+          <span>cors</span>
+          <span>metrics</span>
+          <span>rate-limit</span>
+          <span>request-logger</span>
+          <span>options-static</span>
+          <span>options-http</span>
+        </div>
+      </section>
+
+      <section class="section-block panel final-cta">
+        <div>
+          <p class="eyebrow">Start here</p>
+          <h2>If your team wants a thin BFF with clear boundaries, this is the point of entry.</h2>
+          <p class="section-copy">
+            Read the docs, inspect the examples, and scaffold a starter app. The
+            project is intentionally trying to stay small enough that you can
+            understand the runtime before the day is over.
+          </p>
+        </div>
+        <div class="cta-stack">
+          <a class="button button-primary" href="./docs/index.html">Open Docs Portal</a>
+          <a class="button button-secondary" href="./docs/cli.md">See CLI Guide</a>
+          <a class="button button-secondary" href="https://github.com/vinono/humming">Browse Repository</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>humming is a plugin-first lightweight BFF core for Bun.</p>
+      <div class="footer-links">
+        <a href="./docs/index.html">Docs</a>
+        <a href="./README.md">README</a>
+        <a href="https://github.com/vinono/humming">GitHub</a>
+      </div>
+    </footer>
+  </body>
+</html>

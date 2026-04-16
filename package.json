@@ -45,6 +45,7 @@
   "scripts": {
     "benchmark:forward": "bun scripts/benchmark-forward.ts",
     "build": "tsc -p tsconfig.build.json",
+    "build:pages": "bun scripts/build-pages.ts",
     "dev": "bun --watch src/main.ts",
     "prepack": "bun run build",
     "start": "bun src/main.ts",

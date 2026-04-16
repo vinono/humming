@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>humming Docs</title>
+    <meta
+      name="description"
+      content="Documentation entry for humming: overview, plugin system, CLI, transport, production, benchmark, and plugin authoring guides."
+    />
+    <link rel="stylesheet" href="../site/styles.css" />
+  </head>
+  <body class="page-shell docs-shell">
+    <div class="site-backdrop" aria-hidden="true">
+      <div class="glow glow-cyan"></div>
+      <div class="glow glow-amber"></div>
+      <div class="grid-noise"></div>
+    </div>
+
+    <header class="topbar">
+      <a class="brand-lockup" href="../index.html" aria-label="humming home">
+        <img
+          src="../assets/brand/humming-mark.svg"
+          alt=""
+          width="40"
+          height="40"
+        />
+        <span>humming docs</span>
+      </a>
+      <nav class="topnav">
+        <a href="../index.html">Home</a>
+        <a href="../README.md">README</a>
+        <a href="https://github.com/vinono/humming">GitHub</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero panel docs-hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Documentation entry</p>
+          <h1>Find the shortest path from evaluation to implementation.</h1>
+          <p class="lede">
+            This page is the entry point for the current `humming` docs set.
+            The detailed guides still live in Markdown so they stay close to the
+            codebase and version history.
+          </p>
+        </div>
+        <div class="hero-card compact-card">
+          <p class="mini-label">Recommended reading paths</p>
+          <ul class="route-list">
+            <li><strong>Evaluating humming:</strong> overview → README → plugin system</li>
+            <li><strong>Starting a new app:</strong> CLI → examples → production</li>
+            <li><strong>Tuning forward:</strong> transport → benchmark → production</li>
+            <li><strong>Building extensions:</strong> plugin system → plugin guide</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section-block">
+        <div class="section-heading">
+          <p class="eyebrow">Core guides</p>
+          <h2>Read the architecture and runtime boundaries first.</h2>
+        </div>
+        <div class="doc-grid">
+          <a class="doc-card" href="./overview.md">
+            <h3>Overview</h3>
+            <p>Positioning, architecture, core boundaries, and when `humming` is the right fit.</p>
+          </a>
+          <a class="doc-card" href="./plugin-system.md">
+            <h3>Plugin system</h3>
+            <p>Extension model, governance direction, execution order, and growth strategy.</p>
+          </a>
+          <a class="doc-card" href="./transport.md">
+            <h3>Transport</h3>
+            <p>Forward transport strategies, keepalive, retry policy, and custom transport hooks.</p>
+          </a>
+          <a class="doc-card" href="./production.md">
+            <h3>Production</h3>
+            <p>Runtime setup, operational concerns, and how to keep the service predictable.</p>
+          </a>
+        </div>
+      </section>
+
+      <section class="section-block">
+        <div class="section-heading">
+          <p class="eyebrow">Tooling guides</p>
+          <h2>Use the CLI and benchmark docs when you want to move quickly.</h2>
+        </div>
+        <div class="doc-grid">
+          <a class="doc-card" href="./cli.md">
+            <h3>CLI</h3>
+            <p>Scaffold apps from templates and standardize local project bootstrapping.</p>
+          </a>
+          <a class="doc-card" href="./benchmark.md">
+            <h3>Benchmark</h3>
+            <p>Measure the forward baseline and compare direct upstream calls with proxied traffic.</p>
+          </a>
+          <a class="doc-card" href="../PLUGIN_GUIDE.md">
+            <h3>Plugin guide</h3>
+            <p>Code-level authoring details, examples, and patterns for building custom plugins.</p>
+          </a>
+          <a class="doc-card" href="../README.md">
+            <h3>Repository README</h3>
+            <p>Main project landing page with quick start, official plugins, and examples.</p>
+          </a>
+        </div>
+      </section>
+
+      <section class="section-block panel split-panel">
+        <div>
+          <p class="eyebrow">Examples</p>
+          <h2>Map the docs to runnable templates.</h2>
+          <p class="section-copy">
+            The examples folder is the fastest way to move from concepts to a
+            running app. Use the matching example after each guide instead of
+            trying to absorb everything at once.
+          </p>
+        </div>
+        <div class="example-links">
+          <a href="../examples/basic/README.md">basic</a>
+          <a href="../examples/with-plugins/README.md">with-plugins</a>
+          <a href="../examples/with-forward/README.md">with-forward</a>
+          <a href="../examples/with-async-plugin/README.md">with-async-plugin</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>Detailed docs live in versioned Markdown files inside this repository.</p>
+      <div class="footer-links">
+        <a href="../index.html">Home</a>
+        <a href="../README.md">README</a>
+        <a href="https://github.com/vinono/humming/tree/main/docs">Docs Folder</a>
+      </div>
+    </footer>
+  </body>
+</html>

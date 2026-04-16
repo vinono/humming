@@ -2,6 +2,10 @@
 
 This folder collects the focused guides for `humming`.
 
+If you want a lightweight web-style documentation entry, open `./index.html`.
+
+For GitHub Pages deployment, the static docs entry is exported by `bun run build:pages`.
+
 If you are new to the project, start here:
 
 1. [Overview](./overview.md)
