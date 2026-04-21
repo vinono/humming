@@ -179,6 +179,10 @@ export type ForwardHookSet = {
   onError?: ForwardOnErrorHook;
 };
 
+export type ForwardHookRegistrationOptions = {
+  owner?: string;
+};
+
 export type ForwardTransportRequest = {
   context: Context<AppBindings>;
   requestId: string;
@@ -264,6 +268,11 @@ type ForwardTransportFailure = {
   transportErrorCode: string | null;
 };
 
+type ForwardHookRegistration<T> = {
+  hook: T;
+  owner: string | null;
+};
+
 function nowMs() {
   return performance.now();
 }
@@ -284,6 +293,10 @@ function createForwardPhaseTimings(): ForwardPhaseTimings {
     afterResponse: 0,
     onError: 0,
   };
+}
+
+function collectHookOwners<T>(hooks: ForwardHookRegistration<T>[]) {
+  return Array.from(new Set(hooks.map((hook) => hook.owner).filter((owner): owner is string => Boolean(owner))));
 }
 
 function buildForwardTimingSummary(timings: ForwardPhaseTimings, requestStartAt: number) {
@@ -1092,10 +1105,10 @@ function classifyForwardTransportFailure(error: unknown): ForwardTransportFailur
 }
 
 export function createForwardProxy(options: ForwardProxyOptions) {
-  const beforeMatchHooks: ForwardBeforeMatchHook[] = [];
-  const beforeRequestHooks: ForwardBeforeRequestHook[] = [];
-  const afterResponseHooks: ForwardAfterResponseHook[] = [];
-  const onErrorHooks: ForwardOnErrorHook[] = [];
+  const beforeMatchHooks: ForwardHookRegistration<ForwardBeforeMatchHook>[] = [];
+  const beforeRequestHooks: ForwardHookRegistration<ForwardBeforeRequestHook>[] = [];
+  const afterResponseHooks: ForwardHookRegistration<ForwardAfterResponseHook>[] = [];
+  const onErrorHooks: ForwardHookRegistration<ForwardOnErrorHook>[] = [];
   const defaultTransport = options.defaultTransport ?? DEFAULT_FORWARD_PROXY_OPTIONS.defaultTransport ?? 'fetch';
   const transports = createTransportRegistry(options.transports);
   const forwardRules = normalizeForwardRules(
@@ -1146,8 +1159,8 @@ export function createForwardProxy(options: ForwardProxyOptions) {
     let currentRequestUrl = new URL(input.requestUrl.toString());
     let currentRequestMethod = input.requestMethod;
 
-    for (const hook of beforeMatchHooks) {
-      const result = await hook({
+    for (const entry of beforeMatchHooks) {
+      const result = await entry.hook({
         context: input.context,
         requestUrl: new URL(currentRequestUrl.toString()),
         requestMethod: currentRequestMethod,
@@ -1181,6 +1194,12 @@ export function createForwardProxy(options: ForwardProxyOptions) {
       beforeRequest: beforeRequestHooks.length,
       afterResponse: afterResponseHooks.length,
       onError: onErrorHooks.length,
+    };
+    const hookOwners = {
+      beforeMatch: collectHookOwners(beforeMatchHooks),
+      beforeRequest: collectHookOwners(beforeRequestHooks),
+      afterResponse: collectHookOwners(afterResponseHooks),
+      onError: collectHookOwners(onErrorHooks),
     };
     let requestUrl = new URL(c.req.url);
     let requestMethod = c.req.method.toUpperCase();
@@ -1221,8 +1240,8 @@ export function createForwardProxy(options: ForwardProxyOptions) {
 
       stage = 'beforeRequest';
       const beforeRequestStartAt = nowMs();
-      for (const hook of beforeRequestHooks) {
-        const result = await hook({
+      for (const entry of beforeRequestHooks) {
+        const result = await entry.hook({
           context: c,
           requestId,
           requestUrl,
@@ -1285,8 +1304,8 @@ export function createForwardProxy(options: ForwardProxyOptions) {
 
       stage = 'afterResponse';
       const afterResponseStartAt = nowMs();
-      for (const hook of afterResponseHooks) {
-        const maybeResponse = await hook({
+      for (const entry of afterResponseHooks) {
+        const maybeResponse = await entry.hook({
           context: c,
           requestId,
           requestUrl,
@@ -1318,6 +1337,7 @@ export function createForwardProxy(options: ForwardProxyOptions) {
           status: response.status,
           localDebugRuntimeApplied: isLocalDebugRuntimeApplied(c),
           hookCounts,
+          hookOwners,
           phaseTimingsMs: buildForwardTimingSummary(phaseTimings, requestStartAt),
         },
         'request forwarded'
@@ -1335,8 +1355,8 @@ export function createForwardProxy(options: ForwardProxyOptions) {
       let onErrorResponse: Response | null = null;
 
       const onErrorStartAt = nowMs();
-      for (const hook of onErrorHooks) {
-        const maybeResponse = await hook({
+      for (const entry of onErrorHooks) {
+        const maybeResponse = await entry.hook({
           context: c,
           requestId,
           requestUrl,
@@ -1372,6 +1392,7 @@ export function createForwardProxy(options: ForwardProxyOptions) {
           transportErrorCode: transportFailure?.transportErrorCode ?? null,
           localDebugRuntimeApplied: isLocalDebugRuntimeApplied(c),
           hookCounts,
+          hookOwners,
           handledByOnErrorHook,
           handledStatus: onErrorResponse?.status ?? null,
           phaseTimingsMs: buildForwardTimingSummary(phaseTimings, requestStartAt),
@@ -1445,30 +1466,54 @@ export function createForwardProxy(options: ForwardProxyOptions) {
 
   return {
     tryForwardRequest,
-    registerBeforeMatch(hook: ForwardBeforeMatchHook) {
-      beforeMatchHooks.push(hook);
+    registerBeforeMatch(hook: ForwardBeforeMatchHook, options?: ForwardHookRegistrationOptions) {
+      beforeMatchHooks.push({
+        hook,
+        owner: options?.owner?.trim() || null,
+      });
     },
-    registerBeforeRequest(hook: ForwardBeforeRequestHook) {
-      beforeRequestHooks.push(hook);
+    registerBeforeRequest(hook: ForwardBeforeRequestHook, options?: ForwardHookRegistrationOptions) {
+      beforeRequestHooks.push({
+        hook,
+        owner: options?.owner?.trim() || null,
+      });
     },
-    registerAfterResponse(hook: ForwardAfterResponseHook) {
-      afterResponseHooks.push(hook);
+    registerAfterResponse(hook: ForwardAfterResponseHook, options?: ForwardHookRegistrationOptions) {
+      afterResponseHooks.push({
+        hook,
+        owner: options?.owner?.trim() || null,
+      });
     },
-    registerOnError(hook: ForwardOnErrorHook) {
-      onErrorHooks.push(hook);
+    registerOnError(hook: ForwardOnErrorHook, options?: ForwardHookRegistrationOptions) {
+      onErrorHooks.push({
+        hook,
+        owner: options?.owner?.trim() || null,
+      });
     },
-    registerHooks(hooks: ForwardHookSet) {
+    registerHooks(hooks: ForwardHookSet, options?: ForwardHookRegistrationOptions) {
       if (hooks.beforeMatch) {
-        beforeMatchHooks.push(hooks.beforeMatch);
+        beforeMatchHooks.push({
+          hook: hooks.beforeMatch,
+          owner: options?.owner?.trim() || null,
+        });
       }
       if (hooks.beforeRequest) {
-        beforeRequestHooks.push(hooks.beforeRequest);
+        beforeRequestHooks.push({
+          hook: hooks.beforeRequest,
+          owner: options?.owner?.trim() || null,
+        });
       }
       if (hooks.afterResponse) {
-        afterResponseHooks.push(hooks.afterResponse);
+        afterResponseHooks.push({
+          hook: hooks.afterResponse,
+          owner: options?.owner?.trim() || null,
+        });
       }
       if (hooks.onError) {
-        onErrorHooks.push(hooks.onError);
+        onErrorHooks.push({
+          hook: hooks.onError,
+          owner: options?.owner?.trim() || null,
+        });
       }
     },
   };

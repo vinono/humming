@@ -30,12 +30,15 @@ export type HummingPluginContext = {
   services: HummingServices;
   use: (path: string, middleware: MiddlewareHandler<AppBindings>) => void;
   route: (path: string, routes: Hono<AppBindings>) => void;
+  onDispose: (handler: HummingPluginDisposeHandler) => void;
 };
+
+export type HummingPluginDisposeHandler = () => void | Promise<void>;
 
 export type HummingPlugin = {
   name: string;
   meta?: HummingPluginMeta;
-  setup: (context: HummingPluginContext) => void | Promise<void>;
+  setup: (context: HummingPluginContext) => void | HummingPluginDisposeHandler | Promise<void | HummingPluginDisposeHandler>;
 };
 
 export type HummingBuiltins = {
@@ -50,4 +53,8 @@ export type CreateAppOptions = {
   plugins?: HummingPlugin[];
   builtins?: HummingBuiltins;
   services?: Partial<HummingServices>;
+};
+
+export type HummingApp = Hono<AppBindings> & {
+  dispose: () => Promise<void>;
 };

@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
 import { Hono } from 'hono';
 import { createApp, createAppSync, definePlugin } from './app';
 import { createForwardProxy } from '../forward/proxy';
-import { createLogger } from '../logger';
+import { createLogger, logger as sharedLogger } from '../logger';
 import type { AppBindings } from '../types';
 import { parseEnv } from '../config/env';
 
@@ -82,6 +82,150 @@ describe('core app runtime', () => {
     expect(await response.json()).toEqual({ ready: true });
   });
 
+  it('logs plugin setup summaries with routes, middleware, option sources, hooks, and cleanup counts', () => {
+    const capturedLogs: Array<{ payload: unknown; message?: string }> = [];
+    const logger = createLogger({ level: 'info' });
+    logger.info = ((payload: unknown, message?: string) => {
+      capturedLogs.push({ payload, message });
+      return logger;
+    }) as typeof logger.info;
+
+    createAppSync({
+      logger,
+      builtins: {
+        health: false,
+        options: false,
+        forward: false,
+      },
+      plugins: [
+        definePlugin({
+          name: 'observed-plugin',
+          meta: {
+            debugLabel: 'trace-me',
+          },
+          setup({ route, use, services, onDispose }) {
+            use('/api/*', async (_, next) => {
+              await next();
+            });
+
+            const routes = new Hono<AppBindings>();
+            routes.get('/hello', (c) => c.json({ ok: true }));
+            routes.post('/submit', (c) => c.json({ ok: true }));
+            route('/feature', routes);
+
+            services.options.registerSource('memory', async () => []);
+            services.forwardProxy.registerBeforeRequest(() => undefined);
+            services.forwardProxy.registerHooks({
+              afterResponse() {},
+              onError() {},
+            });
+
+            onDispose(() => undefined);
+          },
+        }),
+      ],
+    });
+
+    const setupLog = capturedLogs.find((entry) => entry.message === 'plugin setup observed') as
+      | {
+          payload: {
+            pluginSetup: Array<{
+              name: string;
+              debugLabel: string | null;
+              middlewarePaths: string[];
+              routeMounts: Array<{
+                mountPath: string;
+                routes: Array<{ method: string; path: string }>;
+              }>;
+              optionSources: string[];
+              forwardHooks: {
+                beforeMatch: number;
+                beforeRequest: number;
+                afterResponse: number;
+                onError: number;
+              };
+              disposeHandlers: number;
+            }>;
+          };
+        }
+      | undefined;
+
+    expect(setupLog).toBeDefined();
+    expect(setupLog?.payload.pluginSetup).toEqual([
+      {
+        name: 'observed-plugin',
+        debugLabel: 'trace-me',
+        middlewareCount: 1,
+        middlewarePaths: ['/api/*'],
+        routeMountCount: 1,
+        routeCount: 2,
+        routeMounts: [
+          {
+            mountPath: '/feature',
+            routes: [
+              { method: 'GET', path: '/feature/hello' },
+              { method: 'POST', path: '/feature/submit' },
+            ],
+          },
+        ],
+        optionSources: ['memory'],
+        forwardHooks: {
+          beforeMatch: 0,
+          beforeRequest: 1,
+          afterResponse: 1,
+          onError: 1,
+        },
+        disposeHandlers: 1,
+      },
+    ]);
+  });
+
+  it('disposes plugin handlers in reverse registration order and only once', async () => {
+    const events: string[] = [];
+    const app = await createApp({
+      builtins: {
+        health: false,
+        options: false,
+        forward: false,
+      },
+      plugins: [
+        definePlugin({
+          name: 'alpha-plugin',
+          setup({ onDispose }) {
+            events.push('setup:alpha');
+            onDispose(() => {
+              events.push('dispose:alpha:registered');
+            });
+
+            return () => {
+              events.push('dispose:alpha:return');
+            };
+          },
+        }),
+        definePlugin({
+          name: 'beta-plugin',
+          setup() {
+            events.push('setup:beta');
+            return () => {
+              events.push('dispose:beta:return');
+            };
+          },
+        }),
+      ],
+    });
+
+    await app.dispose();
+    await app.dispose();
+
+    expect(events).toEqual([
+      'setup:alpha',
+      'setup:beta',
+      'dispose:beta:return',
+      'dispose:alpha:return',
+      'dispose:alpha:registered',
+    ]);
+  });
+
   it('throws when async plugins are used with createAppSync', () => {
     const plugin = definePlugin({
       name: 'async-plugin',
@@ -97,6 +241,74 @@ describe('core app runtime', () => {
         plugins: [plugin],
       })
     ).toThrow('use createApp() instead of createAppSync()');
+  });
+
+  it('rolls back sync plugin cleanup when createAppSync startup fails', () => {
+    const events: string[] = [];
+
+    expect(() =>
+      createAppSync({
+        builtins: {
+          health: false,
+          options: false,
+          forward: false,
+        },
+        plugins: [
+          definePlugin({
+            name: 'cleanup-plugin',
+            setup({ onDispose }) {
+              events.push('setup:cleanup');
+              onDispose(() => {
+                events.push('dispose:cleanup');
+              });
+            },
+          }),
+          definePlugin({
+            name: 'broken-plugin',
+            setup() {
+              throw new Error('sync startup failed');
+            },
+          }),
+        ],
+      })
+    ).toThrow('sync startup failed');
+
+    expect(events).toEqual(['setup:cleanup', 'dispose:cleanup']);
+  });
+
+  it('rolls back async plugin cleanup when createApp startup fails', async () => {
+    const events: string[] = [];
+
+    await expect(
+      createApp({
+        builtins: {
+          health: false,
+          options: false,
+          forward: false,
+        },
+        plugins: [
+          definePlugin({
+            name: 'cleanup-plugin',
+            async setup({ onDispose }) {
+              events.push('setup:cleanup');
+              onDispose(async () => {
+                events.push('dispose:cleanup:start');
+                await Bun.sleep(0);
+                events.push('dispose:cleanup:done');
+              });
+            },
+          }),
+          definePlugin({
+            name: 'broken-plugin',
+            async setup() {
+              throw new Error('async startup failed');
+            },
+          }),
+        ],
+      })
+    ).rejects.toThrow('async startup failed');
+
+    expect(events).toEqual(['setup:cleanup', 'dispose:cleanup:start', 'dispose:cleanup:done']);
   });
 
   it('lets plugins register forward hooks through core services', async () => {
@@ -139,6 +351,70 @@ describe('core app runtime', () => {
     expect(response.status).toBe(200);
     expect(String(calls[0]?.input)).toBe('https://backend.example.com/api/ping');
     expect(new Headers(calls[0]?.init?.headers).get('x-core-plugin')).toBe('enabled');
+  });
+
+  it('includes hook owner names in forward logs for plugin-registered hooks', async () => {
+    const originalInfo = sharedLogger.info;
+    const infoLogs: Array<{ payload: unknown; message?: string }> = [];
+    sharedLogger.info = ((payload: unknown, message?: string) => {
+      infoLogs.push({ payload, message });
+      return sharedLogger;
+    }) as typeof sharedLogger.info;
+
+    try {
+      globalThis.fetch = (async () => new Response('ok', { status: 200 })) as typeof fetch;
+
+      const app = createAppSync({
+        builtins: {
+          health: false,
+          options: false,
+          forward: true,
+        },
+        services: {
+          forwardProxy: createForwardProxy({
+            enabled: true,
+            defaultTimeoutMs: 5_000,
+            blockPrivateIp: false,
+            rulesJson: JSON.stringify([{ prefix: '/api', target: 'https://backend.example.com' }]),
+          }),
+        },
+        plugins: [
+          definePlugin({
+            name: 'hook-owner-plugin',
+            setup({ services }) {
+              services.forwardProxy.registerBeforeRequest(() => undefined);
+              services.forwardProxy.registerAfterResponse(() => undefined);
+            },
+          }),
+        ],
+      });
+
+      const response = await app.request('/api/ping');
+      expect(response.status).toBe(200);
+
+      const forwardedLog = infoLogs.find((entry) => entry.message === 'request forwarded') as
+        | {
+            payload: {
+              hookOwners: {
+                beforeMatch: string[];
+                beforeRequest: string[];
+                afterResponse: string[];
+                onError: string[];
+              };
+            };
+          }
+        | undefined;
+
+      expect(forwardedLog).toBeDefined();
+      expect(forwardedLog?.payload.hookOwners).toEqual({
+        beforeMatch: [],
+        beforeRequest: ['hook-owner-plugin'],
+        afterResponse: ['hook-owner-plugin'],
+        onError: [],
+      });
+    } finally {
+      sharedLogger.info = originalInfo;
+    }
   });
 
   it('orders plugins by descending priority', async () => {

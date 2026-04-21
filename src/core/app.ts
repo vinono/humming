@@ -10,7 +10,15 @@ import { createOptionsService } from '../options/service';
 import { createHealthRoutes } from '../routes/health';
 import { createLocalDebugRuntime } from '../runtime/local-debug';
 import type { AppBindings } from '../types';
-import type { CreateAppOptions, HummingBuiltins, HummingPlugin, HummingPluginContext, HummingServices } from './types';
+import type {
+  CreateAppOptions,
+  HummingApp,
+  HummingBuiltins,
+  HummingPlugin,
+  HummingPluginContext,
+  HummingPluginDisposeHandler,
+  HummingServices,
+} from './types';
 
 const DEFAULT_BUILTINS: Required<HummingBuiltins> = {
   health: true,
@@ -55,24 +63,293 @@ function createServices(appEnv: AppEnv, services?: Partial<HummingServices>): Hu
   };
 }
 
+type RegisteredPluginDisposeHandler = {
+  handler: HummingPluginDisposeHandler;
+  pluginName: string;
+};
+
+type ObservedRoute = {
+  method: string;
+  path: string;
+};
+
+type PluginRouteMountObservation = {
+  mountPath: string;
+  routes: ObservedRoute[];
+};
+
+type PluginSetupObservation = {
+  name: string;
+  debugLabel: string | null;
+  middlewarePaths: string[];
+  routeMounts: PluginRouteMountObservation[];
+  optionSources: string[];
+  forwardHooks: {
+    beforeMatch: number;
+    beforeRequest: number;
+    afterResponse: number;
+    onError: number;
+  };
+  disposeHandlers: number;
+};
+
+function normalizeObservedPath(path: string) {
+  if (!path || path === '/') {
+    return '/';
+  }
+
+  const normalized = path.startsWith('/') ? path : `/${path}`;
+  return normalized.replace(/\/{2,}/g, '/');
+}
+
+function joinObservedRoutePath(mountPath: string, routePath: string) {
+  const normalizedMountPath = normalizeObservedPath(mountPath);
+  const normalizedRoutePath = normalizeObservedPath(routePath);
+
+  if (normalizedMountPath === '/') {
+    return normalizedRoutePath;
+  }
+
+  if (normalizedRoutePath === '/') {
+    return normalizedMountPath;
+  }
+
+  return `${normalizedMountPath}${normalizedRoutePath}`.replace(/\/{2,}/g, '/');
+}
+
+function inspectMountedRoutes(routes: Hono<AppBindings>, mountPath: string): ObservedRoute[] {
+  const routeEntries = (routes as Hono<AppBindings> & {
+    routes?: Array<{ method?: string; path?: string }>;
+  }).routes;
+
+  if (!Array.isArray(routeEntries)) {
+    return [];
+  }
+
+  return routeEntries
+    .filter((route) => typeof route.method === 'string' && typeof route.path === 'string')
+    .map((route) => ({
+      method: route.method!,
+      path: joinObservedRoutePath(mountPath, route.path!),
+    }));
+}
+
+function createPluginSetupObservation(plugin: HummingPlugin): PluginSetupObservation {
+  return {
+    name: plugin.name,
+    debugLabel: plugin.meta?.debugLabel?.trim() || null,
+    middlewarePaths: [],
+    routeMounts: [],
+    optionSources: [],
+    forwardHooks: {
+      beforeMatch: 0,
+      beforeRequest: 0,
+      afterResponse: 0,
+      onError: 0,
+    },
+    disposeHandlers: 0,
+  };
+}
+
 function createPluginContext(
+  plugin: HummingPlugin,
   app: Hono<AppBindings>,
   appEnv: AppEnv,
   appLogger: AppLogger,
-  services: HummingServices
+  services: HummingServices,
+  observation: PluginSetupObservation,
+  registerDisposeHandler: (handler: HummingPluginDisposeHandler) => void
 ): HummingPluginContext {
+  const observedServices: HummingServices = {
+    options: {
+      ...services.options,
+      registerSource(type, resolver) {
+        observation.optionSources.push(type);
+        services.options.registerSource(type, resolver);
+      },
+    },
+    forwardProxy: {
+      ...services.forwardProxy,
+      registerBeforeMatch(hook, options) {
+        observation.forwardHooks.beforeMatch += 1;
+        services.forwardProxy.registerBeforeMatch(hook, {
+          ...options,
+          owner: options?.owner ?? describePlugin(plugin),
+        });
+      },
+      registerBeforeRequest(hook, options) {
+        observation.forwardHooks.beforeRequest += 1;
+        services.forwardProxy.registerBeforeRequest(hook, {
+          ...options,
+          owner: options?.owner ?? describePlugin(plugin),
+        });
+      },
+      registerAfterResponse(hook, options) {
+        observation.forwardHooks.afterResponse += 1;
+        services.forwardProxy.registerAfterResponse(hook, {
+          ...options,
+          owner: options?.owner ?? describePlugin(plugin),
+        });
+      },
+      registerOnError(hook, options) {
+        observation.forwardHooks.onError += 1;
+        services.forwardProxy.registerOnError(hook, {
+          ...options,
+          owner: options?.owner ?? describePlugin(plugin),
+        });
+      },
+      registerHooks(hooks, options) {
+        if (hooks.beforeMatch) {
+          observation.forwardHooks.beforeMatch += 1;
+        }
+        if (hooks.beforeRequest) {
+          observation.forwardHooks.beforeRequest += 1;
+        }
+        if (hooks.afterResponse) {
+          observation.forwardHooks.afterResponse += 1;
+        }
+        if (hooks.onError) {
+          observation.forwardHooks.onError += 1;
+        }
+        services.forwardProxy.registerHooks(hooks, {
+          ...options,
+          owner: options?.owner ?? describePlugin(plugin),
+        });
+      },
+    },
+    localDebugRuntime: services.localDebugRuntime,
+  };
+
   return {
     app,
     env: appEnv,
     logger: appLogger,
-    services,
+    services: observedServices,
     use(path, middleware) {
+      observation.middlewarePaths.push(path);
       app.use(path, middleware);
     },
     route(path, routes) {
+      observation.routeMounts.push({
+        mountPath: path,
+        routes: inspectMountedRoutes(routes, path),
+      });
       app.route(path, routes);
     },
+    onDispose(handler) {
+      registerDisposeHandler(handler);
+    },
   };
+}
+
+function toError(error: unknown) {
+  return error instanceof Error ? error : new Error(String(error));
+}
+
+function createDisposeErrorMessage(failedPlugins: string[]) {
+  if (failedPlugins.length === 1) {
+    return `Plugin disposal failed in "${failedPlugins[0]}".`;
+  }
+
+  return `Plugin disposal failed in ${failedPlugins.length} handlers.`;
+}
+
+async function executeDisposeHandlers(
+  appLogger: AppLogger,
+  disposeHandlers: RegisteredPluginDisposeHandler[]
+) {
+  const errors: Error[] = [];
+  const failedPlugins: string[] = [];
+
+  for (const entry of [...disposeHandlers].reverse()) {
+    try {
+      await entry.handler();
+    } catch (error) {
+      const normalizedError = toError(error);
+      errors.push(normalizedError);
+      failedPlugins.push(entry.pluginName);
+      appLogger.error(
+        {
+          plugin: entry.pluginName,
+          err: normalizedError,
+        },
+        'plugin dispose failed'
+      );
+    }
+  }
+
+  if (errors.length > 0) {
+    throw new AggregateError(errors, createDisposeErrorMessage(failedPlugins));
+  }
+}
+
+function executeDisposeHandlersSyncOnFailure(
+  appLogger: AppLogger,
+  disposeHandlers: RegisteredPluginDisposeHandler[]
+) {
+  const errors: Error[] = [];
+  const failedPlugins: string[] = [];
+
+  for (const entry of [...disposeHandlers].reverse()) {
+    try {
+      const result = entry.handler();
+      if (result instanceof Promise) {
+        void result.catch((error) => {
+          const normalizedError = toError(error);
+          appLogger.error(
+            {
+              plugin: entry.pluginName,
+              err: normalizedError,
+            },
+            'plugin dispose failed during sync startup rollback'
+          );
+        });
+      }
+    } catch (error) {
+      const normalizedError = toError(error);
+      errors.push(normalizedError);
+      failedPlugins.push(entry.pluginName);
+      appLogger.error(
+        {
+          plugin: entry.pluginName,
+          err: normalizedError,
+        },
+        'plugin dispose failed during sync startup rollback'
+      );
+    }
+  }
+
+  if (errors.length > 0) {
+    throw new AggregateError(errors, createDisposeErrorMessage(failedPlugins));
+  }
+}
+
+function summarizePluginObservations(observations: PluginSetupObservation[]) {
+  return observations.map((observation) => ({
+    name: observation.name,
+    debugLabel: observation.debugLabel,
+    middlewareCount: observation.middlewarePaths.length,
+    middlewarePaths: observation.middlewarePaths,
+    routeMountCount: observation.routeMounts.length,
+    routeCount: observation.routeMounts.reduce((total, routeMount) => total + routeMount.routes.length, 0),
+    routeMounts: observation.routeMounts,
+    optionSources: observation.optionSources,
+    forwardHooks: observation.forwardHooks,
+    disposeHandlers: observation.disposeHandlers,
+  }));
+}
+
+function logPluginSetupObservability(appLogger: AppLogger, observations: PluginSetupObservation[]) {
+  if (observations.length === 0) {
+    return;
+  }
+
+  appLogger.info(
+    {
+      pluginSetup: summarizePluginObservations(observations),
+    },
+    'plugin setup observed'
+  );
 }
 
 function installErrorHandling(
@@ -144,21 +421,71 @@ function buildBaseApp(options: CreateAppOptions) {
   const pluginResolution = resolvePlugins(options.plugins ?? [], appEnv);
   const plugins = pluginResolution.enabled;
   const app = new Hono<AppBindings>();
+  const disposeHandlers: RegisteredPluginDisposeHandler[] = [];
+  const pluginObservations = new Map<HummingPlugin, PluginSetupObservation>();
+  let disposePromise: Promise<void> | null = null;
 
   app.use('*', requestIdMiddleware);
   installErrorHandling(app, appEnv, appLogger, builtins);
   logPluginResolution(appLogger, pluginResolution, appEnv);
+  const getPluginObservation = (plugin: HummingPlugin) => {
+    let observation = pluginObservations.get(plugin);
 
-  const pluginContext = createPluginContext(app, appEnv, appLogger, services);
+    if (!observation) {
+      observation = createPluginSetupObservation(plugin);
+      pluginObservations.set(plugin, observation);
+    }
+
+    return observation;
+  };
+  const registerPluginDisposeHandler = (plugin: HummingPlugin, handler: HummingPluginDisposeHandler) => {
+    getPluginObservation(plugin).disposeHandlers += 1;
+    disposeHandlers.push({
+      handler,
+      pluginName: describePlugin(plugin),
+    });
+  };
+  const createPluginRuntimeContext = (plugin: HummingPlugin) =>
+    createPluginContext(
+      plugin,
+      app,
+      appEnv,
+      appLogger,
+      services,
+      getPluginObservation(plugin),
+      (handler) => registerPluginDisposeHandler(plugin, handler)
+    );
+
+  const dispose = async () => {
+    if (!disposePromise) {
+      disposePromise = executeDisposeHandlers(appLogger, disposeHandlers).finally(() => {
+        disposeHandlers.length = 0;
+      });
+    }
+
+    return disposePromise;
+  };
+
+  const hummingApp = app as HummingApp;
+  hummingApp.dispose = dispose;
 
   return {
-    app,
+    app: hummingApp,
     appEnv,
     appLogger,
     builtins,
     services,
     plugins,
-    pluginContext,
+    createPluginRuntimeContext,
+    registerPluginDisposeHandler,
+    getPluginObservations() {
+      return plugins.map((plugin) => getPluginObservation(plugin));
+    },
+    dispose,
+    disposeSyncOnFailure() {
+      executeDisposeHandlersSyncOnFailure(appLogger, disposeHandlers);
+      disposeHandlers.length = 0;
+    },
   };
 }
 
@@ -307,29 +634,61 @@ export function definePlugin(plugin: HummingPlugin): HummingPlugin {
   return plugin;
 }
 
-export function createAppSync(options: CreateAppOptions = {}) {
+export function createAppSync(options: CreateAppOptions = {}): HummingApp {
   const runtime = buildBaseApp(options);
 
-  for (const plugin of runtime.plugins) {
-    const result = plugin.setup(runtime.pluginContext);
-    if (result instanceof Promise) {
-      throw new Error(`Plugin "${describePlugin(plugin)}" is async. use createApp() instead of createAppSync().`);
+  try {
+    for (const plugin of runtime.plugins) {
+      const result = plugin.setup(runtime.createPluginRuntimeContext(plugin));
+      if (result instanceof Promise) {
+        throw new Error(`Plugin "${describePlugin(plugin)}" is async. use createApp() instead of createAppSync().`);
+      }
+      if (typeof result === 'function') {
+        runtime.registerPluginDisposeHandler(plugin, result);
+      }
     }
-  }
 
-  installBuiltins(runtime.app, runtime.builtins, runtime.services);
-  installForwardTerminal(runtime.app, runtime.builtins, runtime.services);
-  return runtime.app;
+    installBuiltins(runtime.app, runtime.builtins, runtime.services);
+    installForwardTerminal(runtime.app, runtime.builtins, runtime.services);
+    logPluginSetupObservability(runtime.appLogger, runtime.getPluginObservations());
+    return runtime.app;
+  } catch (error) {
+    try {
+      runtime.disposeSyncOnFailure();
+    } catch (disposeError) {
+      throw new AggregateError([toError(error), ...((disposeError as AggregateError).errors ?? [disposeError]).map(toError)], 'Failed to create app and dispose partially initialized plugins.');
+    }
+
+    throw error;
+  }
 }
 
-export async function createApp(options: CreateAppOptions = {}) {
+export async function createApp(options: CreateAppOptions = {}): Promise<HummingApp> {
   const runtime = buildBaseApp(options);
 
-  for (const plugin of runtime.plugins) {
-    await plugin.setup(runtime.pluginContext);
-  }
+  try {
+    for (const plugin of runtime.plugins) {
+      const result = await plugin.setup(runtime.createPluginRuntimeContext(plugin));
+      if (typeof result === 'function') {
+        runtime.registerPluginDisposeHandler(plugin, result);
+      }
+    }
 
-  installBuiltins(runtime.app, runtime.builtins, runtime.services);
-  installForwardTerminal(runtime.app, runtime.builtins, runtime.services);
-  return runtime.app;
+    installBuiltins(runtime.app, runtime.builtins, runtime.services);
+    installForwardTerminal(runtime.app, runtime.builtins, runtime.services);
+    logPluginSetupObservability(runtime.appLogger, runtime.getPluginObservations());
+    return runtime.app;
+  } catch (error) {
+    try {
+      await runtime.dispose();
+    } catch (disposeError) {
+      const disposeErrors = disposeError instanceof AggregateError ? Array.from(disposeError.errors, toError) : [toError(disposeError)];
+      throw new AggregateError(
+        [toError(error), ...disposeErrors],
+        'Failed to create app and dispose partially initialized plugins.'
+      );
+    }
+
+    throw error;
+  }
 }

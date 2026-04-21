@@ -29,6 +29,8 @@ export const myPlugin = definePlugin({
 });
 ```
 
+`setup()` may also return a cleanup function, and plugins can register additional teardown work through `context.onDispose()`.
+
 Optional metadata helps govern plugin behavior:
 
 ```ts
@@ -69,8 +71,59 @@ Each plugin receives:
 - `services.localDebugRuntime`: shared local debug state for login env, target, cookies, and tenant data
 - `use(path, middleware)`: register middleware
 - `route(path, routes)`: mount Hono routes
+- `onDispose(handler)`: register cleanup work for `app.dispose()`
 
 If multiple local-debug plugins need to coordinate environment switching or cookie state, prefer `services.localDebugRuntime` as the single in-process source of truth instead of having each plugin read its own file.
+
+## Plugin Cleanup
+
+Plugins that create long-lived resources should register teardown behavior.
+
+```ts
+import { definePlugin } from 'humming';
+
+export const timerPlugin = definePlugin({
+  name: 'timer-plugin',
+  setup({ logger, onDispose }) {
+    const timer = setInterval(() => {
+      logger.debug({ plugin: 'timer-plugin' }, 'tick');
+    }, 1_000);
+
+    onDispose(() => {
+      clearInterval(timer);
+    });
+  },
+});
+```
+
+You can also return a cleanup function directly from `setup()`:
+
+```ts
+definePlugin({
+  name: 'resource-plugin',
+  setup() {
+    const resource = createResource();
+
+    return async () => {
+      await resource.close();
+    };
+  },
+});
+```
+
+App teardown is explicit:
+
+```ts
+const app = await createApp({
+  env,
+  plugins: [timerPlugin],
+});
+
+await app.dispose();
+```
+
+At startup, `humming` logs a `plugin setup observed` summary for each enabled plugin.
+That summary includes middleware paths, mounted routes, option source registrations, forward hook counts, and teardown handler counts.
 
 ## Sync Plugin Example
 
@@ -343,6 +396,8 @@ Forward customization should happen through hooks:
 - `registerAfterResponse()`
 - `registerOnError()`
 - `registerHooks()`
+
+When those hooks are registered through plugin setup, forward request logs include hook-owner summaries so you can see which plugin names contributed the active hook chain.
 
 Example:
 

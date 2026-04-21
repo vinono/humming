@@ -36,6 +36,11 @@ This shape is intentionally small:
 - `meta`: optional governance hints
 - `setup(context)`: the place where the plugin attaches behavior
 
+`setup()` can also register teardown behavior:
+
+- return a cleanup function
+- call `context.onDispose(handler)` for one or more cleanup tasks
+
 ## What A Plugin Can Do
 
 Inside `setup()`, a plugin can:
@@ -61,6 +66,7 @@ Each plugin receives:
 - `services.localDebugRuntime`
 - `use(path, middleware)`
 - `route(path, routes)`
+- `onDispose(handler)`
 
 This is a deliberate balance:
 
@@ -75,14 +81,33 @@ The runtime currently supports:
 
 - sync setup through `createAppSync()`
 - async setup through `createApp()`
+- explicit app teardown through `app.dispose()`
 - mode filtering
 - priority ordering
 - dependency validation
 - conflict validation
 - duplicate-name detection
 - startup resolution logs
+- plugin setup summary logs for middleware, routes, option sources, forward hooks, and teardown handlers
 
 That means plugins are not just an array of callbacks anymore. There is already a lightweight governance layer.
+
+## Runtime Visibility
+
+The runtime now logs two useful plugin-focused views:
+
+- `plugins resolved`: which plugins were enabled or skipped before setup
+- `plugin setup observed`: what each enabled plugin registered during setup
+
+The setup summary includes:
+
+- middleware paths added through `use()`
+- route mount points and discovered route methods/paths from `route()`
+- option source types registered through `services.options.registerSource()`
+- forward hook counts registered through `services.forwardProxy`
+- teardown handler counts registered for `app.dispose()`
+
+Forward request logs also include hook-owner summaries so you can see which plugin names registered the active forward hooks for a request.
 
 ## Governance Metadata
 
@@ -165,16 +190,23 @@ The plugin system is good, but it is not a full ecosystem platform yet.
 
 It still has a few clear limits:
 
-### No Full Lifecycle Model
+### Lifecycle Is Still Simple
 
-Right now the main lifecycle hook is `setup()`.
+The project now has a practical cleanup model through plugin teardown handlers and `app.dispose()`.
 
-That means there is no standard plugin-level `dispose()` or shutdown hook for:
+That is enough for:
 
-- Redis clients
 - timers
 - long-lived resources
-- external connections
+- external clients
+
+But it is still not a fully rich lifecycle platform yet.
+
+There is still no broader lifecycle vocabulary such as:
+
+- plugin readiness hooks
+- staged shutdown phases
+- framework-level resource ownership policies
 
 ### Ordering Is Still Coarse
 

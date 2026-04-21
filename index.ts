@@ -2,11 +2,13 @@ export { createApp, createAppSync, definePlugin } from './src/app';
 export * from './src/config/env';
 export type {
   CreateAppOptions,
+  HummingApp,
   HummingBuiltins,
   HummingPluginMeta,
   HummingPluginMode,
   HummingPlugin,
   HummingPluginContext,
+  HummingPluginDisposeHandler,
   HummingServices,
 } from './src/core';
 export * from './src/forward/proxy';

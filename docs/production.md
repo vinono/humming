@@ -110,6 +110,7 @@ Recommended production pattern:
 - expose `/metrics` only to internal networks or trusted scrapers
 - keep request logs structured
 - use forward phase timing logs to separate hook cost from upstream latency
+- use forward hook-owner summaries to see which plugins contributed request-time hook behavior
 - align scrape labels and route labels with your monitoring conventions
 
 If you need a shared telemetry standard across many services, keep `humming` as the transport edge and layer your own telemetry plugin conventions on top.
