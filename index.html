@@ -39,8 +39,9 @@
       <div class="topbar-controls">
         <nav class="topnav">
           <a href="#use-cases" data-i18n="nav.useCases">Use Cases</a>
-          <a href="#ecosystem" data-i18n="nav.ecosystem">Ecosystem</a>
+          <a href="#examples" data-i18n="nav.examples">Examples</a>
           <a href="#cli" data-i18n="nav.cli">CLI</a>
+          <a href="#ops-home" data-i18n="nav.ops">Ops</a>
           <a href="#docs" data-i18n="nav.docs">Docs</a>
           <a href="./README.md" data-i18n="nav.readme">README</a>
           <a href="https://github.com/vinono/humming" data-i18n="nav.github">GitHub</a>
@@ -227,6 +228,30 @@ bun run dev</code></pre>
         </div>
       </section>
 
+      <section class="section-block panel compare-panel">
+        <div class="section-heading">
+          <p class="eyebrow" data-i18n="compare.eyebrow">Why this shape</p>
+          <h2 data-i18n="compare.title">Sits between a temporary proxy file and a heavyweight backend platform.</h2>
+        </div>
+        <div class="compare-grid">
+          <article class="compare-card">
+            <span class="token" data-i18n="compare.cardOne.token">temporary proxy</span>
+            <h3 data-i18n="compare.cardOne.title">Fast to start, easy to outgrow.</h3>
+            <p data-i18n="compare.cardOne.body">Good for a quick local redirect, but it usually stops short of shared plugins, explicit runtime services, transport policy, and observability.</p>
+          </article>
+          <article class="compare-card compare-card-featured">
+            <span class="token" data-i18n="compare.cardTwo.token">humming</span>
+            <h3 data-i18n="compare.cardTwo.title">A small kernel with enough structure to stay readable.</h3>
+            <p data-i18n="compare.cardTwo.body">Keep the core narrow, grow through plugins, and make route, forward, and runtime behavior visible enough that teams can actually maintain it.</p>
+          </article>
+          <article class="compare-card">
+            <span class="token" data-i18n="compare.cardThree.token">heavy framework</span>
+            <h3 data-i18n="compare.cardThree.title">Broader surface, more ceremony, different job.</h3>
+            <p data-i18n="compare.cardThree.body">Useful when the service itself is the full backend platform, but often more infrastructure and abstraction than a thin frontend-facing BFF needs.</p>
+          </article>
+        </div>
+      </section>
+
       <section class="section-block panel ecosystem-panel" id="ecosystem">
         <div class="section-heading">
           <p class="eyebrow" data-i18n="ecosystem.eyebrow">Plugin ecosystem</p>
@@ -337,6 +362,35 @@ Next steps:
         </div>
       </section>
 
+      <section class="section-block" id="examples">
+        <div class="section-heading">
+          <p class="eyebrow" data-i18n="examplesHome.eyebrow">Runnable paths</p>
+          <h2 data-i18n="examplesHome.title">Jump from the product story into concrete, runnable examples.</h2>
+        </div>
+        <div class="doc-grid example-grid">
+          <a class="doc-card" href="./examples/basic/README.md">
+            <span class="token">basic</span>
+            <h3 data-i18n="examplesHome.basic.title">Core only</h3>
+            <p data-i18n="examplesHome.basic.body">Start with health and options only when you want the smallest useful app shape.</p>
+          </a>
+          <a class="doc-card" href="./examples/with-plugins/README.md">
+            <span class="token">with-plugins</span>
+            <h3 data-i18n="examplesHome.plugins.title">Operational add-ons</h3>
+            <p data-i18n="examplesHome.plugins.body">See auth, cache, metrics, rate limiting, request logging, and options in one app shell.</p>
+          </a>
+          <a class="doc-card" href="./examples/with-forward/README.md">
+            <span class="token">with-forward</span>
+            <h3 data-i18n="examplesHome.forward.title">Forward and hook flow</h3>
+            <p data-i18n="examplesHome.forward.body">Use request and response hooks plus transport-aware forwarding when the BFF needs upstream control.</p>
+          </a>
+          <a class="doc-card" href="./examples/with-async-plugin/README.md">
+            <span class="token">with-async-plugin</span>
+            <h3 data-i18n="examplesHome.async.title">Async startup</h3>
+            <p data-i18n="examplesHome.async.body">Reach for `createApp()` when plugin setup needs async work before the app is ready.</p>
+          </a>
+        </div>
+      </section>
+
       <section class="section-block" id="docs">
         <div class="section-heading">
           <p class="eyebrow" data-i18n="docs.eyebrow">Documentation</p>
@@ -362,25 +416,59 @@ Next steps:
         </div>
       </section>
 
-      <section class="section-block panel split-panel">
-        <div>
-          <p class="eyebrow" data-i18n="growth.eyebrow">Plugin-first growth</p>
-          <h2 data-i18n="growth.title">Keep operational behavior out of core until you actually need it.</h2>
-          <p class="section-copy" data-i18n="growth.body">
-            The official plugins already cover auth, cache, CORS, metrics, rate
-            limiting, request logging, and options providers. That keeps the
-            kernel narrow while still giving teams a practical way to grow.
-          </p>
+      <section class="section-block panel signals-panel">
+        <div class="section-heading">
+          <p class="eyebrow" data-i18n="signals.eyebrow">Runtime signals</p>
+          <h2 data-i18n="signals.title">Small runtime does not have to mean opaque runtime.</h2>
         </div>
-        <div class="plugin-tags">
-          <span>auth</span>
-          <span>cache</span>
-          <span>cors</span>
-          <span>metrics</span>
-          <span>rate-limit</span>
-          <span>request-logger</span>
-          <span>options-static</span>
-          <span>options-http</span>
+        <p class="section-copy signals-copy" data-i18n="signals.body">
+          `humming` is trying to stay small without forcing teams to debug blind. Startup summaries, forward timings, hook ownership, transport strategy, and plugin cleanup are meant to stay visible as the app grows.
+        </p>
+        <div class="signal-grid">
+          <article class="signal-card">
+            <h3 data-i18n="signals.cardOne.title">Startup summaries</h3>
+            <p data-i18n="signals.cardOne.body">See which plugins were enabled and what each one registered during setup.</p>
+          </article>
+          <article class="signal-card">
+            <h3 data-i18n="signals.cardTwo.title">Forward phase timing</h3>
+            <p data-i18n="signals.cardTwo.body">Split matching, hooks, upstream execution, and error handling into separate timing phases.</p>
+          </article>
+          <article class="signal-card">
+            <h3 data-i18n="signals.cardThree.title">Hook ownership</h3>
+            <p data-i18n="signals.cardThree.body">Track which plugins contributed the active forward hook chain for a request.</p>
+          </article>
+          <article class="signal-card">
+            <h3 data-i18n="signals.cardFour.title">Explicit teardown</h3>
+            <p data-i18n="signals.cardFour.body">Dispose plugin resources cleanly instead of letting timers, clients, and shared handles leak into shutdown.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section-block panel ops-home-panel" id="ops-home">
+        <div class="section-heading">
+          <p class="eyebrow" data-i18n="opsHome.eyebrow">Transport and operations</p>
+          <h2 data-i18n="opsHome.title">The runtime is small, but the operational surface is still intentional.</h2>
+        </div>
+        <p class="section-copy ops-home-copy" data-i18n="opsHome.body">
+          `humming` keeps `forward` in core because upstream control is a real BFF concern. That means transport policy, rollout boundaries, regression baselines, and observability deserve first-class guidance instead of scattered notes.
+        </p>
+        <div class="doc-grid ops-home-grid">
+          <a class="doc-card" href="./docs/transport.md">
+            <h3 data-i18n="opsHome.transport.title">Transport</h3>
+            <p data-i18n="opsHome.transport.body">Choose between baseline fetch, keepalive-oriented fetch, retrying fetch, or a custom transport contract.</p>
+          </a>
+          <a class="doc-card" href="./docs/production.md">
+            <h3 data-i18n="opsHome.production.title">Production</h3>
+            <p data-i18n="opsHome.production.body">Read the deployment model, forward safety stance, metrics guidance, and cache and auth boundaries.</p>
+          </a>
+          <a class="doc-card" href="./docs/benchmark.md">
+            <h3 data-i18n="opsHome.benchmark.title">Benchmark</h3>
+            <p data-i18n="opsHome.benchmark.body">Compare direct upstream traffic against forwarded traffic before you change runtime behavior.</p>
+          </a>
+          <a class="doc-card" href="./docs/roadmap.md">
+            <h3 data-i18n="opsHome.roadmap.title">Roadmap</h3>
+            <p data-i18n="opsHome.roadmap.body">See where plugin lifecycle, observability, and broader platform maturity are heading next.</p>
+          </a>
         </div>
       </section>
 

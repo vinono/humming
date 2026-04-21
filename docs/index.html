@@ -39,6 +39,9 @@
       <div class="topbar-controls">
         <nav class="topnav">
           <a href="../index.html" data-i18n="nav.home">Home</a>
+          <a href="#tracks" data-i18n="nav.tracks">Tracks</a>
+          <a href="#examples" data-i18n="nav.examples">Examples</a>
+          <a href="#ops" data-i18n="nav.ops">Ops</a>
           <a href="../README.md" data-i18n="nav.readme">README</a>
           <a href="https://github.com/vinono/humming" data-i18n="nav.github">GitHub</a>
         </nav>
@@ -74,6 +77,55 @@
             <li data-i18n="hero.pathThree" data-i18n-mode="html"><strong>Tuning forward:</strong> transport → benchmark → production</li>
             <li data-i18n="hero.pathFour" data-i18n-mode="html"><strong>Building extensions:</strong> plugin system → plugin guide</li>
           </ul>
+        </div>
+      </section>
+
+      <section class="section-block" id="tracks">
+        <div class="section-heading">
+          <p class="eyebrow" data-i18n="tracks.eyebrow">Reading tracks</p>
+          <h2 data-i18n="tracks.title">Pick the path that matches the job in front of you.</h2>
+        </div>
+        <div class="doc-grid track-grid">
+          <article class="doc-card track-card">
+            <span class="token" data-i18n="tracks.evaluate.token">evaluate</span>
+            <h3 data-i18n="tracks.evaluate.title">Assess fit first</h3>
+            <p data-i18n="tracks.evaluate.body">Start with positioning and boundaries before reading implementation details.</p>
+            <div class="example-links">
+              <a href="./overview.md">overview</a>
+              <a href="../README.md">README</a>
+              <a href="./plugin-system.md">plugin-system</a>
+            </div>
+          </article>
+          <article class="doc-card track-card">
+            <span class="token" data-i18n="tracks.start.token">start</span>
+            <h3 data-i18n="tracks.start.title">Launch a new app</h3>
+            <p data-i18n="tracks.start.body">Use the CLI, inspect examples, then move into production guidance once the shape is clear.</p>
+            <div class="example-links">
+              <a href="./cli.md">cli</a>
+              <a href="../examples/with-plugins/README.md">examples</a>
+              <a href="./production.md">production</a>
+            </div>
+          </article>
+          <article class="doc-card track-card">
+            <span class="token" data-i18n="tracks.extend.token">extend</span>
+            <h3 data-i18n="tracks.extend.title">Build plugins and hooks</h3>
+            <p data-i18n="tracks.extend.body">Understand the plugin model first, then drop to the authoring guide and forward hooks.</p>
+            <div class="example-links">
+              <a href="./plugin-system.md">plugin-system</a>
+              <a href="../PLUGIN_GUIDE.md">plugin-guide</a>
+              <a href="./transport.md">transport</a>
+            </div>
+          </article>
+          <article class="doc-card track-card">
+            <span class="token" data-i18n="tracks.operate.token">operate</span>
+            <h3 data-i18n="tracks.operate.title">Prepare for rollout</h3>
+            <p data-i18n="tracks.operate.body">Focus on transport policy, production guidance, local benchmarks, and the current roadmap.</p>
+            <div class="example-links">
+              <a href="./transport.md">transport</a>
+              <a href="./benchmark.md">benchmark</a>
+              <a href="./roadmap.md">roadmap</a>
+            </div>
+          </article>
         </div>
       </section>
 
@@ -127,7 +179,7 @@
         </div>
       </section>
 
-      <section class="section-block panel split-panel">
+      <section class="section-block panel split-panel" id="examples">
         <div>
           <p class="eyebrow" data-i18n="examples.eyebrow">Examples</p>
           <h2 data-i18n="examples.title">Map the docs to runnable templates.</h2>
@@ -142,6 +194,34 @@
           <a href="../examples/with-plugins/README.md">with-plugins</a>
           <a href="../examples/with-forward/README.md">with-forward</a>
           <a href="../examples/with-async-plugin/README.md">with-async-plugin</a>
+        </div>
+      </section>
+
+      <section class="section-block panel split-panel" id="ops">
+        <div>
+          <p class="eyebrow" data-i18n="ops.eyebrow">Operational depth</p>
+          <h2 data-i18n="ops.title">When the question is operational, follow the transport-to-rollout path.</h2>
+          <p class="section-copy" data-i18n="ops.body">
+            `humming` is small, but the forward path, startup summaries, plugin lifecycle, and production boundaries still deserve deliberate reading. This set is the shortest way to get there.
+          </p>
+        </div>
+        <div class="doc-grid ops-grid">
+          <a class="doc-card" href="./transport.md">
+            <h3 data-i18n="ops.transport.title">Transport policy</h3>
+            <p data-i18n="ops.transport.body">Understand retry, keepalive, custom transport boundaries, and route-level selection.</p>
+          </a>
+          <a class="doc-card" href="./production.md">
+            <h3 data-i18n="ops.production.title">Production guide</h3>
+            <p data-i18n="ops.production.body">Review deployment shape, auth, cache, logging, metrics, and forward safety expectations.</p>
+          </a>
+          <a class="doc-card" href="./benchmark.md">
+            <h3 data-i18n="ops.benchmark.title">Benchmark workflow</h3>
+            <p data-i18n="ops.benchmark.body">Use the local forward benchmark as a regression signal before changing transport behavior.</p>
+          </a>
+          <a class="doc-card" href="./roadmap.md">
+            <h3 data-i18n="ops.roadmap.title">Roadmap</h3>
+            <p data-i18n="ops.roadmap.body">See which maturity gaps are being closed now and which areas intentionally wait.</p>
+          </a>
         </div>
       </section>
     </main>

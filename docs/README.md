@@ -14,6 +14,7 @@ If you are new to the project, start here:
 4. [Transport](./transport.md)
 5. [Production](./production.md)
 6. [Benchmark](./benchmark.md)
+7. [Roadmap](./roadmap.md)
 
 ## Guides
 
@@ -34,6 +35,7 @@ If you are new to the project, start here:
 ### Operations
 
 - [Production](./production.md): deployment and operational guidance
+- [Roadmap](./roadmap.md): current priorities grouped into P0, P1, and P2
 
 ## Recommended Reading Paths
 
@@ -60,3 +62,9 @@ If you are preparing for production rollout:
 1. [Transport](./transport.md)
 2. [Production](./production.md)
 3. [Benchmark](./benchmark.md)
+
+If you want to understand what the project should prioritize next:
+
+1. [Overview](./overview.md)
+2. [Plugin System](./plugin-system.md)
+3. [Roadmap](./roadmap.md)

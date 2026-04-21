@@ -11,8 +11,10 @@ const translations = {
       'brand.homeAria': 'humming home',
       'lang.switchLabel': 'Language switch',
       'nav.useCases': 'Use Cases',
+      'nav.examples': 'Examples',
       'nav.ecosystem': 'Ecosystem',
       'nav.cli': 'CLI',
+      'nav.ops': 'Ops',
       'nav.docs': 'Docs',
       'nav.readme': 'README',
       'nav.github': 'GitHub',
@@ -100,6 +102,22 @@ bun run dev`,
       'core.flow.core': 'humming core',
       'core.flow.plugins': 'plugins',
       'core.flow.upstream': 'upstream services',
+      'compare.eyebrow': 'Why this shape',
+      'compare.title':
+        'Sits between a temporary proxy file and a heavyweight backend platform.',
+      'compare.cardOne.token': 'temporary proxy',
+      'compare.cardOne.title': 'Fast to start, easy to outgrow.',
+      'compare.cardOne.body':
+        'Good for a quick local redirect, but it usually stops short of shared plugins, explicit runtime services, transport policy, and observability.',
+      'compare.cardTwo.token': 'humming',
+      'compare.cardTwo.title':
+        'A small kernel with enough structure to stay readable.',
+      'compare.cardTwo.body':
+        'Keep the core narrow, grow through plugins, and make route, forward, and runtime behavior visible enough that teams can actually maintain it.',
+      'compare.cardThree.token': 'heavy framework',
+      'compare.cardThree.title': 'Broader surface, more ceremony, different job.',
+      'compare.cardThree.body':
+        'Useful when the service itself is the full backend platform, but often more infrastructure and abstraction than a thin frontend-facing BFF needs.',
       'ecosystem.eyebrow': 'Plugin ecosystem',
       'ecosystem.title':
         'Grow outward from a stable kernel instead of stuffing optional behavior into core.',
@@ -159,6 +177,38 @@ Next steps:
       'cli.plugins':
         'Auth, cache, metrics, rate limit, options, and a custom plugin route.',
       'cli.forward': 'Forward rules plus request and response hook examples.',
+      'examplesHome.eyebrow': 'Runnable paths',
+      'examplesHome.title':
+        'Jump from the product story into concrete, runnable examples.',
+      'examplesHome.basic.title': 'Core only',
+      'examplesHome.basic.body':
+        'Start with health and options only when you want the smallest useful app shape.',
+      'examplesHome.plugins.title': 'Operational add-ons',
+      'examplesHome.plugins.body':
+        'See auth, cache, metrics, rate limiting, request logging, and options in one app shell.',
+      'examplesHome.forward.title': 'Forward and hook flow',
+      'examplesHome.forward.body':
+        'Use request and response hooks plus transport-aware forwarding when the BFF needs upstream control.',
+      'examplesHome.async.title': 'Async startup',
+      'examplesHome.async.body':
+        'Reach for `createApp()` when plugin setup needs async work before the app is ready.',
+      'opsHome.eyebrow': 'Transport and operations',
+      'opsHome.title':
+        'The runtime is small, but the operational surface is still intentional.',
+      'opsHome.body':
+        '`humming` keeps `forward` in core because upstream control is a real BFF concern. That means transport policy, rollout boundaries, regression baselines, and observability deserve first-class guidance instead of scattered notes.',
+      'opsHome.transport.title': 'Transport',
+      'opsHome.transport.body':
+        'Choose between baseline fetch, keepalive-oriented fetch, retrying fetch, or a custom transport contract.',
+      'opsHome.production.title': 'Production',
+      'opsHome.production.body':
+        'Read the deployment model, forward safety stance, metrics guidance, and cache and auth boundaries.',
+      'opsHome.benchmark.title': 'Benchmark',
+      'opsHome.benchmark.body':
+        'Compare direct upstream traffic against forwarded traffic before you change runtime behavior.',
+      'opsHome.roadmap.title': 'Roadmap',
+      'opsHome.roadmap.body':
+        'See where plugin lifecycle, observability, and broader platform maturity are heading next.',
       'docs.eyebrow': 'Documentation',
       'docs.title': 'Start from the entry that matches the job at hand.',
       'docs.portal.title': 'Docs portal',
@@ -173,11 +223,22 @@ Next steps:
       'docs.cli.title': 'CLI',
       'docs.cli.body':
         'Scaffold a new app quickly with the Bun-first starter templates.',
-      'growth.eyebrow': 'Plugin-first growth',
-      'growth.title':
-        'Keep operational behavior out of core until you actually need it.',
-      'growth.body':
-        'The official plugins already cover auth, cache, CORS, metrics, rate limiting, request logging, and options providers. That keeps the kernel narrow while still giving teams a practical way to grow.',
+      'signals.eyebrow': 'Runtime signals',
+      'signals.title': 'Small runtime does not have to mean opaque runtime.',
+      'signals.body':
+        '`humming` is trying to stay small without forcing teams to debug blind. Startup summaries, forward timings, hook ownership, transport strategy, and plugin cleanup are meant to stay visible as the app grows.',
+      'signals.cardOne.title': 'Startup summaries',
+      'signals.cardOne.body':
+        'See which plugins were enabled and what each one registered during setup.',
+      'signals.cardTwo.title': 'Forward phase timing',
+      'signals.cardTwo.body':
+        'Split matching, hooks, upstream execution, and error handling into separate timing phases.',
+      'signals.cardThree.title': 'Hook ownership',
+      'signals.cardThree.body':
+        'Track which plugins contributed the active forward hook chain for a request.',
+      'signals.cardFour.title': 'Explicit teardown',
+      'signals.cardFour.body':
+        'Dispose plugin resources cleanly instead of letting timers, clients, and shared handles leak into shutdown.',
       'final.eyebrow': 'Start here',
       'final.title':
         'If your team wants a thin BFF with clear boundaries, this is the point of entry.',
@@ -198,8 +259,10 @@ Next steps:
       'brand.homeAria': 'humming 首页',
       'lang.switchLabel': '语言切换',
       'nav.useCases': '适用场景',
+      'nav.examples': '示例',
       'nav.ecosystem': '插件生态',
       'nav.cli': '脚手架',
+      'nav.ops': '运维',
       'nav.docs': '文档',
       'nav.readme': 'README',
       'nav.github': 'GitHub',
@@ -278,6 +341,20 @@ bun run dev`,
       'core.flow.core': 'humming core',
       'core.flow.plugins': '插件',
       'core.flow.upstream': '上游服务',
+      'compare.eyebrow': '为什么是这种形状',
+      'compare.title': '它位于临时代理配置和重量级后端平台之间。',
+      'compare.cardOne.token': '临时代理',
+      'compare.cardOne.title': '启动很快，但也很容易很快不够用。',
+      'compare.cardOne.body':
+        '适合快速做本地转发，但通常不会自然演进出共享插件、显式运行时服务、transport 策略和可观测性。',
+      'compare.cardTwo.token': 'humming',
+      'compare.cardTwo.title': '一个足够小、但也足够有结构的内核。',
+      'compare.cardTwo.body':
+        '让 core 保持窄，通过插件生长，同时让路由、forward 和运行时行为保持可见，团队才能真的维护下去。',
+      'compare.cardThree.token': '重框架',
+      'compare.cardThree.title': '表面更宽、仪式感更强、解决的是另一类问题。',
+      'compare.cardThree.body':
+        '当服务本身就是完整后端平台时很有价值，但对一个薄的前端侧 BFF 来说，往往意味着更多基础设施和抽象成本。',
       'ecosystem.eyebrow': '插件生态',
       'ecosystem.title': '从稳定内核向外扩展，而不是把可选行为都塞进 core。',
       'ecosystem.pluginsLabel': '官方插件',
@@ -326,6 +403,36 @@ bun run dev`,
       'cli.basic': '只包含 core 内置能力的最小可用应用。',
       'cli.plugins': '内含 auth、cache、metrics、rate limit、options 和一个自定义插件路由。',
       'cli.forward': '包含 forward 规则，以及请求/响应 hook 示例。',
+      'examplesHome.eyebrow': '可运行路径',
+      'examplesHome.title': '从产品定位直接跳到具体、可运行的示例。',
+      'examplesHome.basic.title': '仅 core',
+      'examplesHome.basic.body':
+        '当你只想从最小可用应用形状开始时，用 health 和 options 即可。',
+      'examplesHome.plugins.title': '运维型扩展',
+      'examplesHome.plugins.body':
+        '在一个应用壳里直接看到 auth、cache、metrics、rate limiting、request logging 和 options 的组合。',
+      'examplesHome.forward.title': 'Forward 与 hook 流程',
+      'examplesHome.forward.body':
+        '当 BFF 需要控制上游请求时，使用请求/响应 hooks 和 transport-aware forwarding。',
+      'examplesHome.async.title': '异步启动',
+      'examplesHome.async.body':
+        '当插件初始化在应用 ready 之前就需要异步工作时，使用 `createApp()`。',
+      'opsHome.eyebrow': 'Transport 与运维',
+      'opsHome.title': '运行时虽然精简，但运维表面仍然是有意识设计过的。',
+      'opsHome.body':
+        '`humming` 把 `forward` 放在 core 里，是因为上游控制本来就是 BFF 的真实关切。这也意味着 transport 策略、上线边界、回归基线和可观测性应该有一套一等公民级别的说明，而不是散落在备注里。',
+      'opsHome.transport.title': 'Transport',
+      'opsHome.transport.body':
+        '在基础 fetch、keepalive 导向 fetch、带重试 fetch 和自定义 transport 合约之间做选择。',
+      'opsHome.production.title': 'Production',
+      'opsHome.production.body':
+        '阅读部署模型、forward 安全边界、metrics 指导，以及 cache 与 auth 的使用边界。',
+      'opsHome.benchmark.title': 'Benchmark',
+      'opsHome.benchmark.body':
+        '在修改运行时行为之前，先对比直连上游和 forward 后流量的差异。',
+      'opsHome.roadmap.title': 'Roadmap',
+      'opsHome.roadmap.body':
+        '查看 plugin lifecycle、observability 和更广的平台成熟度接下来会往哪里走。',
       'docs.eyebrow': '文档',
       'docs.title': '从最适合当前任务的入口开始。',
       'docs.portal.title': '文档入口',
@@ -336,10 +443,19 @@ bun run dev`,
       'docs.transport.body': 'keepalive、retry policy 和自定义 transport 策略边界。',
       'docs.cli.title': 'CLI',
       'docs.cli.body': '使用 Bun 风格脚手架模板快速创建新项目。',
-      'growth.eyebrow': '插件优先生长',
-      'growth.title': '在真正需要之前，不要把运维行为塞进 core。',
-      'growth.body':
-        '官方插件已经覆盖 auth、cache、CORS、metrics、rate limiting、request logging 和 options providers。这让内核保持窄，同时仍然给团队留下务实的扩展空间。',
+      'signals.eyebrow': '运行时信号',
+      'signals.title': '小运行时不代表必须是黑盒运行时。',
+      'signals.body':
+        '`humming` 想保持精简，但不希望团队在排查时只能摸黑。启动摘要、forward timings、hook ownership、transport 策略和插件 cleanup 都应该随着应用增长继续保持可见。',
+      'signals.cardOne.title': '启动摘要',
+      'signals.cardOne.body': '看到哪些插件被启用，以及它们在 setup 阶段各自注册了什么。',
+      'signals.cardTwo.title': 'Forward 分阶段耗时',
+      'signals.cardTwo.body': '把匹配、hooks、上游执行和错误处理拆成独立 timing phases。',
+      'signals.cardThree.title': 'Hook 归属',
+      'signals.cardThree.body': '跟踪这次请求里哪些插件贡献了 active 的 forward hook 链。',
+      'signals.cardFour.title': '显式 teardown',
+      'signals.cardFour.body':
+        '让插件资源在关闭时被干净释放，而不是把 timer、client 和共享句柄泄漏到 shutdown 过程里。',
       'final.eyebrow': '从这里开始',
       'final.title': '如果你的团队需要一个边界清晰的薄 BFF，这里就是入口。',
       'final.body':
@@ -362,6 +478,9 @@ bun run dev`,
       'brand.docs': 'humming docs',
       'lang.switchLabel': 'Language switch',
       'nav.home': 'Home',
+      'nav.tracks': 'Tracks',
+      'nav.examples': 'Examples',
+      'nav.ops': 'Ops',
       'nav.readme': 'README',
       'nav.github': 'GitHub',
       'hero.eyebrow': 'Documentation entry',
@@ -377,6 +496,24 @@ bun run dev`,
         '<strong>Tuning forward:</strong> transport → benchmark → production',
       'hero.pathFour':
         '<strong>Building extensions:</strong> plugin system → plugin guide',
+      'tracks.eyebrow': 'Reading tracks',
+      'tracks.title': 'Pick the path that matches the job in front of you.',
+      'tracks.evaluate.token': 'evaluate',
+      'tracks.evaluate.title': 'Assess fit first',
+      'tracks.evaluate.body':
+        'Start with positioning and boundaries before reading implementation details.',
+      'tracks.start.token': 'start',
+      'tracks.start.title': 'Launch a new app',
+      'tracks.start.body':
+        'Use the CLI, inspect examples, then move into production guidance once the shape is clear.',
+      'tracks.extend.token': 'extend',
+      'tracks.extend.title': 'Build plugins and hooks',
+      'tracks.extend.body':
+        'Understand the plugin model first, then drop to the authoring guide and forward hooks.',
+      'tracks.operate.token': 'operate',
+      'tracks.operate.title': 'Prepare for rollout',
+      'tracks.operate.body':
+        'Focus on transport policy, production guidance, local benchmarks, and the current roadmap.',
       'core.eyebrow': 'Core guides',
       'core.title': 'Read the architecture and runtime boundaries first.',
       'core.overview.title': 'Overview',
@@ -410,6 +547,23 @@ bun run dev`,
       'examples.title': 'Map the docs to runnable templates.',
       'examples.body':
         'The examples folder is the fastest way to move from concepts to a running app. Use the matching example after each guide instead of trying to absorb everything at once.',
+      'ops.eyebrow': 'Operational depth',
+      'ops.title':
+        'When the question is operational, follow the transport-to-rollout path.',
+      'ops.body':
+        '`humming` is small, but the forward path, startup summaries, plugin lifecycle, and production boundaries still deserve deliberate reading. This set is the shortest way to get there.',
+      'ops.transport.title': 'Transport policy',
+      'ops.transport.body':
+        'Understand retry, keepalive, custom transport boundaries, and route-level selection.',
+      'ops.production.title': 'Production guide',
+      'ops.production.body':
+        'Review deployment shape, auth, cache, logging, metrics, and forward safety expectations.',
+      'ops.benchmark.title': 'Benchmark workflow',
+      'ops.benchmark.body':
+        'Use the local forward benchmark as a regression signal before changing transport behavior.',
+      'ops.roadmap.title': 'Roadmap',
+      'ops.roadmap.body':
+        'See which maturity gaps are being closed now and which areas intentionally wait.',
       'footer.tagline':
         'Detailed docs live in versioned Markdown files inside this repository.',
       'footer.home': 'Home',
@@ -424,6 +578,9 @@ bun run dev`,
       'brand.docs': 'humming 文档',
       'lang.switchLabel': '语言切换',
       'nav.home': '首页',
+      'nav.tracks': '路径',
+      'nav.examples': '示例',
+      'nav.ops': '运维',
       'nav.readme': 'README',
       'nav.github': 'GitHub',
       'hero.eyebrow': '文档入口',
@@ -439,6 +596,20 @@ bun run dev`,
         '<strong>调优 forward：</strong>transport → benchmark → production',
       'hero.pathFour':
         '<strong>开发扩展：</strong>plugin system → plugin guide',
+      'tracks.eyebrow': '阅读路径',
+      'tracks.title': '按你当前要解决的任务来选路径。',
+      'tracks.evaluate.token': '评估',
+      'tracks.evaluate.title': '先判断是否适合',
+      'tracks.evaluate.body': '先看定位和边界，再深入实现细节。',
+      'tracks.start.token': '启动',
+      'tracks.start.title': '开始一个新应用',
+      'tracks.start.body': '先用 CLI，再看 examples，等应用形状明确后再进入 production 指南。',
+      'tracks.extend.token': '扩展',
+      'tracks.extend.title': '开发插件和 hooks',
+      'tracks.extend.body': '先理解插件模型，再进入 authoring guide 和 forward hooks。',
+      'tracks.operate.token': '运维',
+      'tracks.operate.title': '为上线做准备',
+      'tracks.operate.body': '把重点放在 transport 策略、production 指导、本地 benchmark 和当前 roadmap。',
       'core.eyebrow': '核心指南',
       'core.title': '先读架构边界和运行时边界。',
       'core.overview.title': 'Overview',
@@ -466,6 +637,20 @@ bun run dev`,
       'examples.title': '把文档和可运行模板对应起来。',
       'examples.body':
         '从概念到运行中的应用，最快的方式就是 examples 目录。每看完一类指南，就去跑对应示例，而不是一次性硬读完整套文档。',
+      'ops.eyebrow': '运维深度',
+      'ops.title': '当问题偏运维时，沿着 transport 到 rollout 这条路径读下去。',
+      'ops.body':
+        '`humming` 虽然小，但 forward 路径、启动摘要、插件生命周期和 production 边界依然值得被刻意阅读。这组内容就是最短路径。',
+      'ops.transport.title': 'Transport 策略',
+      'ops.transport.body':
+        '理解 retry、keepalive、自定义 transport 边界，以及按路由选择 transport 的方式。',
+      'ops.production.title': 'Production 指南',
+      'ops.production.body':
+        '查看部署形态、auth、cache、logging、metrics 和 forward safety 的预期边界。',
+      'ops.benchmark.title': 'Benchmark 工作流',
+      'ops.benchmark.body': '在修改 transport 行为之前，先把本地 forward benchmark 当作回归信号来用。',
+      'ops.roadmap.title': 'Roadmap',
+      'ops.roadmap.body': '查看哪些成熟度缺口正在补，哪些能力被有意延后。',
       'footer.tagline': '详细文档仍然以版本化 Markdown 文件形式保存在仓库中。',
       'footer.home': '首页',
       'footer.readme': 'README',

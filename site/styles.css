@@ -460,7 +460,9 @@ main {
 .doc-grid,
 .use-case-grid,
 .plugin-cards,
-.cli-grid {
+.cli-grid,
+.compare-grid,
+.signal-grid {
   display: grid;
   gap: 18px;
 }
@@ -543,6 +545,94 @@ main {
 .core-panel .architecture-strip {
   border-color: rgba(121, 217, 255, 0.14);
   padding: 24px 28px;
+}
+
+.compare-panel,
+.signals-panel,
+.ops-home-panel {
+  padding: 30px;
+}
+
+.compare-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.compare-card,
+.signal-card {
+  background: var(--panel-strong);
+  border: 1px solid rgba(121, 217, 255, 0.16);
+  border-radius: var(--radius-lg);
+  min-height: 100%;
+  padding: 24px;
+}
+
+.compare-card h3,
+.signal-card h3 {
+  font-size: 1.22rem;
+  line-height: 1.2;
+  margin: 16px 0 12px;
+}
+
+.compare-card p,
+.signal-card p,
+.signals-copy {
+  color: var(--text-soft);
+  line-height: 1.75;
+  margin: 0;
+}
+
+.compare-card-featured {
+  background:
+    linear-gradient(180deg, rgba(17, 40, 71, 0.92), rgba(9, 19, 35, 0.98)),
+    var(--panel-strong);
+  border-color: rgba(121, 217, 255, 0.3);
+  box-shadow: inset 0 1px 0 rgba(131, 231, 255, 0.08);
+}
+
+.example-grid .doc-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.example-grid .token {
+  align-self: flex-start;
+}
+
+.signals-copy {
+  margin-bottom: 22px;
+  max-width: 72ch;
+}
+
+.signal-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.ops-home-copy {
+  margin-bottom: 22px;
+  max-width: 74ch;
+}
+
+.ops-home-grid,
+.track-grid,
+.ops-grid {
+  gap: 18px;
+}
+
+.ops-home-grid,
+.track-grid,
+.ops-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.track-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.track-card .token {
+  align-self: flex-start;
 }
 
 .use-case-grid {
@@ -779,7 +869,12 @@ main {
   .plugin-cards,
   .ecosystem-grid,
   .cli-grid,
-  .final-cta {
+  .final-cta,
+  .compare-grid,
+  .signal-grid,
+  .ops-home-grid,
+  .track-grid,
+  .ops-grid {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -795,7 +890,12 @@ main {
   .plugin-cards,
   .ecosystem-grid,
   .cli-grid,
-  .final-cta {
+  .final-cta,
+  .compare-grid,
+  .signal-grid,
+  .ops-home-grid,
+  .track-grid,
+  .ops-grid {
     grid-template-columns: 1fr;
   }
 
@@ -849,6 +949,12 @@ main {
   }
 
   .core-panel {
+    padding: 22px;
+  }
+
+  .compare-panel,
+  .signals-panel,
+  .ops-home-panel {
     padding: 22px;
   }
 
