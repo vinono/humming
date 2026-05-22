@@ -901,3 +901,211 @@ describe('official plugins', () => {
     expect(body.data[0]?.val).toEqual([{ id: 'u1', name: 'Ada', value: 'u1', label: 'Ada' }]);
   });
 });
+
+describe('redis integration tests using Bun RedisClient and TCP RESP Mock Server', () => {
+  function parseRESP(text: string): string[][] {
+    const commands: string[][] = [];
+    const lines = text.split('\r\n');
+    let lineIdx = 0;
+    
+    while (lineIdx < lines.length) {
+      const line = lines[lineIdx];
+      if (!line) {
+        lineIdx++;
+        continue;
+      }
+      if (line.startsWith('*')) {
+        const count = parseInt(line.slice(1), 10);
+        if (isNaN(count)) {
+          lineIdx++;
+          continue;
+        }
+        lineIdx++;
+        const args: string[] = [];
+        for (let j = 0; j < count; j++) {
+          if (lineIdx >= lines.length) break;
+          const argLine = lines[lineIdx];
+          if (argLine.startsWith('$')) {
+            lineIdx++; // skip length line
+            if (lineIdx < lines.length) {
+              args.push(lines[lineIdx]);
+              lineIdx++;
+            }
+          } else {
+            args.push(argLine);
+            lineIdx++;
+          }
+        }
+        if (args.length > 0) {
+          commands.push(args);
+        }
+      } else {
+        lineIdx++;
+      }
+    }
+    return commands;
+  }
+
+  function createRESPMockServer() {
+    const db = new Map<string, string>();
+    const ttls = new Map<string, number>();
+
+    const server = Bun.listen({
+      hostname: '127.0.0.1',
+      port: 0,
+      socket: {
+        data(socket, data) {
+          const text = data.toString();
+          const commands = parseRESP(text);
+
+          for (const args of commands) {
+            const cmd = args[0].toUpperCase();
+            if (cmd === 'HELLO') {
+              socket.write('%1\r\n$6\r\nserver\r\n$5\r\nredis\r\n');
+            } else if (cmd === 'PING') {
+              socket.write('+PONG\r\n');
+            } else if (cmd === 'GET') {
+              const key = args[1];
+              const expireAt = ttls.get(key);
+              if (expireAt !== undefined && expireAt <= Date.now()) {
+                db.delete(key);
+                ttls.delete(key);
+              }
+              const val = db.get(key);
+              if (val === undefined) {
+                socket.write('$-1\r\n');
+              } else {
+                socket.write(`$${Buffer.byteLength(val)}\r\n${val}\r\n`);
+              }
+            } else if (cmd === 'SET') {
+              const key = args[1];
+              const val = args[2];
+              db.set(key, val);
+              if (args[3]?.toUpperCase() === 'PX') {
+                const ttl = parseInt(args[4], 10);
+                ttls.set(key, Date.now() + ttl);
+              }
+              socket.write('+OK\r\n');
+            } else if (cmd === 'DEL') {
+              let count = 0;
+              for (let j = 1; j < args.length; j++) {
+                if (db.delete(args[j])) {
+                  ttls.delete(args[j]);
+                  count++;
+                }
+              }
+              socket.write(`:${count}\r\n`);
+            } else if (cmd === 'INCR') {
+              const key = args[1];
+              const cur = parseInt(db.get(key) ?? '0', 10);
+              const next = cur + 1;
+              db.set(key, String(next));
+              socket.write(`:${next}\r\n`);
+            } else if (cmd === 'PEXPIRE') {
+              const key = args[1];
+              const ttl = parseInt(args[2], 10);
+              ttls.set(key, Date.now() + ttl);
+              socket.write(':1\r\n');
+            } else if (cmd === 'PTTL') {
+              const key = args[1];
+              if (!db.has(key)) {
+                socket.write(':-2\r\n');
+              } else {
+                const expireAt = ttls.get(key);
+                if (expireAt === undefined) {
+                  socket.write(':-1\r\n');
+                } else {
+                  const ttl = Math.max(0, expireAt - Date.now());
+                  socket.write(`:${ttl}\r\n`);
+                }
+              }
+            } else {
+              socket.write('-ERR unknown command\r\n');
+            }
+          }
+        },
+      },
+    });
+
+    return {
+      server,
+      url: `redis://127.0.0.1:${server.port}`,
+      db,
+      ttls,
+    };
+  }
+
+  it('redis cache store integration with a real RedisClient over TCP', async () => {
+    const mockServer = createRESPMockServer();
+    const client = new Bun.RedisClient(mockServer.url);
+
+    const store = createRedisCacheStore({
+      client: client as any,
+      prefix: 'integration-cache',
+    });
+
+    const entry = {
+      status: 200,
+      headers: [['content-type', 'text/plain']] as Array<[string, string]>,
+      body: new TextEncoder().encode('integrated!'),
+      expiresAt: Date.now() + 60_000,
+    };
+
+    // Set cache
+    await store.set('test-key', entry, 60_000);
+
+    // Get cache and verify correctness
+    const cached = await store.get('test-key');
+    expect(cached).not.toBeNull();
+    expect(cached?.status).toBe(200);
+    expect(cached?.headers).toEqual([['content-type', 'text/plain']]);
+    expect(new TextDecoder().decode(cached?.body)).toBe('integrated!');
+
+    // Verify key deletion on expiration
+    mockServer.ttls.set('integration-cache:test-key', Date.now() - 1000); // Backdate the TTL manually in mock server
+    const expired = await store.get('test-key');
+    expect(expired).toBeNull();
+
+    mockServer.server.stop();
+  });
+
+  it('redis rate limit store integration with a real RedisClient over TCP', async () => {
+    const mockServer = createRESPMockServer();
+    const client = new Bun.RedisClient(mockServer.url);
+
+    const store = createRedisRateLimitStore({
+      client: client as any,
+      prefix: 'integration-rate',
+    });
+
+    // Consume once
+    const first = await store.consume({
+      key: 'ip:127.0.0.1',
+      windowMs: 5000,
+      now: Date.now(),
+    });
+    expect(first.totalHits).toBe(1);
+
+    // Consume twice
+    const second = await store.consume({
+      key: 'ip:127.0.0.1',
+      windowMs: 5000,
+      now: Date.now(),
+    });
+    expect(second.totalHits).toBe(2);
+
+    // Reset counter
+    await store.reset?.('ip:127.0.0.1');
+
+    // Consume again and check if reset
+    const third = await store.consume({
+      key: 'ip:127.0.0.1',
+      windowMs: 5000,
+      now: Date.now(),
+    });
+    expect(third.totalHits).toBe(1);
+
+    mockServer.server.stop();
+  });
+});
+
