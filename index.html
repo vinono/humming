@@ -10,8 +10,15 @@
       data-i18n="meta.description"
       data-i18n-attr="content"
     />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="./site/styles.css" />
     <script defer src="./site/i18n.js"></script>
+    <script defer src="./site/effects.js"></script>
   </head>
   <body class="page-shell" data-page="home">
     <div class="site-backdrop" aria-hidden="true">
@@ -43,8 +50,6 @@
           <a href="#cli" data-i18n="nav.cli">CLI</a>
           <a href="#ops-home" data-i18n="nav.ops">Ops</a>
           <a href="#docs" data-i18n="nav.docs">Docs</a>
-          <a href="./README.md" data-i18n="nav.readme">README</a>
-          <a href="https://github.com/vinono/humming" data-i18n="nav.github">GitHub</a>
         </nav>
         <div
           class="lang-switch"
@@ -60,7 +65,7 @@
     </header>
 
     <main>
-      <section class="hero panel">
+      <section class="hero panel animate-on-scroll fade-in-up">
         <div class="hero-copy">
           <div class="hero-ribbon">
             <span class="ribbon-dot"></span>
@@ -86,46 +91,110 @@
             <span data-i18n="hero.pillTransport">Transport-aware forward</span>
           </div>
           <div class="hero-stats" aria-label="project stats">
-            <article>
+            <article class="spotlight-card">
               <strong>3</strong>
               <span data-i18n="hero.stats.core">core built-ins</span>
             </article>
-            <article>
+            <article class="spotlight-card">
               <strong>8</strong>
               <span data-i18n="hero.stats.plugins">official plugins</span>
             </article>
-            <article>
+            <article class="spotlight-card">
               <strong>3</strong>
               <span data-i18n="hero.stats.templates">starter templates</span>
             </article>
-            <article>
+            <article class="spotlight-card">
               <strong>1</strong>
               <span data-i18n="hero.stats.boundary">clear boundary</span>
             </article>
           </div>
         </div>
 
-        <div class="hero-card">
-          <p class="mini-label" data-i18n="hero.quickstart.label">Quick start</p>
-          <pre><code data-i18n="hero.quickstart.code">bunx humming init my-bff --template with-forward
+        <div class="hero-card hero-interactive-card spotlight-card">
+          <div class="hero-card-tabs">
+            <button type="button" class="hero-tab-btn is-active" data-tab="quickstart" data-i18n="hero.tab.quickstart">Quick Start</button>
+            <button type="button" class="hero-tab-btn" data-tab="simulator" data-i18n="hero.tab.simulator">BFF Simulator</button>
+          </div>
+          <div class="hero-card-panels">
+            <!-- Quick Start Panel -->
+            <div class="hero-panel-content is-active" id="hero-panel-quickstart">
+              <p class="mini-label" data-i18n="hero.quickstart.label">Quick start</p>
+              <pre><code data-i18n="hero.quickstart.code">bunx humming init my-bff --template with-forward
 cd my-bff
 bun install
 bun run dev</code></pre>
-          <div class="mini-console">
-            <p class="mini-label" data-i18n="hero.console.label">What you get</p>
-            <div class="console-lines">
-              <span data-i18n="hero.console.one">+ health endpoint</span>
-              <span data-i18n="hero.console.two">+ options routes</span>
-              <span data-i18n="hero.console.three">+ forward rules</span>
-              <span data-i18n="hero.console.four">+ plugin-ready app shell</span>
+              <div class="mini-console">
+                <p class="mini-label" data-i18n="hero.console.label">What you get</p>
+                <div class="console-lines">
+                  <span data-i18n="hero.console.one">+ health endpoint</span>
+                  <span data-i18n="hero.console.two">+ options routes</span>
+                  <span data-i18n="hero.console.three">+ forward rules</span>
+                  <span data-i18n="hero.console.four">+ plugin-ready app shell</span>
+                </div>
+              </div>
+            </div>
+            <!-- Simulator Panel -->
+            <div class="hero-panel-content" id="hero-panel-simulator">
+              <div class="simulator-route-selector">
+                <label for="sim-route-select" class="mini-label" data-i18n="hero.sim.routeLabel">Choose Route:</label>
+                <div class="selector-wrapper">
+                  <select id="sim-route-select">
+                    <option value="/health">GET /health (built-in)</option>
+                    <option value="/options">GET /options (plugin option data)</option>
+                    <option value="/api/users">GET /api/users (auth + forward + cache)</option>
+                  </select>
+                  <button type="button" id="sim-send-btn" class="button button-primary" data-i18n="hero.sim.sendBtn">Send Request</button>
+                </div>
+              </div>
+
+              <!-- Animated Diagram Grid -->
+              <div class="sim-diagram">
+                <div class="sim-node" id="node-client">
+                  <span class="node-icon">💻</span>
+                  <span class="node-name" data-i18n="hero.sim.node.client">Client</span>
+                </div>
+                <div class="sim-line-container">
+                  <div class="sim-line" id="line-client-plugins"></div>
+                </div>
+                <div class="sim-node" id="node-plugins">
+                  <span class="node-icon">🛡️</span>
+                  <span class="node-name" data-i18n="hero.sim.node.plugins">Plugins</span>
+                </div>
+                <div class="sim-line-container">
+                  <div class="sim-line" id="line-plugins-core"></div>
+                </div>
+                <div class="sim-node" id="node-core">
+                  <span class="node-icon">🐝</span>
+                  <span class="node-name" data-i18n="hero.sim.node.core">BFF Core</span>
+                </div>
+                <div class="sim-line-container">
+                  <div class="sim-line" id="line-core-upstream"></div>
+                </div>
+                <div class="sim-node" id="node-upstream">
+                  <span class="node-icon">☁️</span>
+                  <span class="node-name" data-i18n="hero.sim.node.upstream">Upstream</span>
+                </div>
+              </div>
+
+              <!-- Real-time Console Logs -->
+              <div class="sim-console">
+                <div class="sim-console-header">
+                  <span data-i18n="hero.sim.consoleLabel">Live BFF logs</span>
+                  <button type="button" id="sim-clear-btn" class="sim-btn-clear" data-i18n="hero.sim.clearBtn">Clear Logs</button>
+                </div>
+                <div class="sim-console-body" id="sim-console-body">
+                  <p class="log-line log-system"><span class="log-time">[Ready]</span> BFF Server initialized and listening on port 3000</p>
+                </div>
+              </div>
             </div>
           </div>
+          <!-- Shared mini info cards at the bottom -->
           <div class="mini-grid">
-            <article>
+            <article class="spotlight-card">
               <h2 data-i18n="hero.cardOne.title">Core stays small</h2>
               <p data-i18n="hero.cardOne.body">Keep `health`, `options`, and `forward` in core and move optional behavior into plugins.</p>
             </article>
-            <article>
+            <article class="spotlight-card">
               <h2 data-i18n="hero.cardTwo.title">Scale by composition</h2>
               <p data-i18n="hero.cardTwo.body">Add auth, cache, metrics, rate limit, or custom routes only where the project actually needs them.</p>
             </article>
@@ -133,13 +202,13 @@ bun run dev</code></pre>
         </div>
       </section>
 
-      <section class="section-block">
+      <section class="section-block animate-on-scroll fade-in-up">
         <div class="section-heading">
           <p class="eyebrow" data-i18n="fit.eyebrow">Where it fits</p>
           <h2 data-i18n="fit.title">Built for thin BFFs, local proxy layers, and frontend teams that want control.</h2>
         </div>
         <div class="feature-grid">
-          <article class="feature-card">
+          <article class="feature-card spotlight-card">
             <h3 data-i18n="fit.cardOne.title">Good fit</h3>
             <ul>
               <li data-i18n="fit.cardOne.one">project-level BFFs</li>
@@ -148,7 +217,7 @@ bun run dev</code></pre>
               <li data-i18n="fit.cardOne.four">frontend-owned runtime extensions</li>
             </ul>
           </article>
-          <article class="feature-card">
+          <article class="feature-card spotlight-card">
             <h3 data-i18n="fit.cardTwo.title">Not trying to be</h3>
             <ul>
               <li data-i18n="fit.cardTwo.one">a full API gateway</li>
@@ -157,7 +226,7 @@ bun run dev</code></pre>
               <li data-i18n="fit.cardTwo.four">an everything-in-core runtime</li>
             </ul>
           </article>
-          <article class="feature-card">
+          <article class="feature-card spotlight-card">
             <h3 data-i18n="fit.cardThree.title">Key runtime ideas</h3>
             <ul>
               <li data-i18n="fit.cardThree.one">plugin-first extension model</li>
@@ -169,28 +238,28 @@ bun run dev</code></pre>
         </div>
       </section>
 
-      <section class="section-block" id="use-cases">
+      <section class="section-block animate-on-scroll fade-in-up" id="use-cases">
         <div class="section-heading">
           <p class="eyebrow" data-i18n="useCases.eyebrow">Use cases</p>
           <h2 data-i18n="useCases.title">Use it where teams need a thin edge layer, not a giant backend surface.</h2>
         </div>
         <div class="use-case-grid">
-          <article class="use-case-card">
+          <article class="use-case-card spotlight-card">
             <span class="token" data-i18n="useCases.cardOne.token">frontend-owned bff</span>
             <h3 data-i18n="useCases.cardOne.title">Ship a small backend the frontend team can actually maintain.</h3>
             <p data-i18n="useCases.cardOne.body">Add local routes, option endpoints, auth guards, and upstream forwarding without pulling the project into a controller-heavy backend stack.</p>
           </article>
-          <article class="use-case-card">
+          <article class="use-case-card spotlight-card">
             <span class="token" data-i18n="useCases.cardTwo.token">local proxy layer</span>
             <h3 data-i18n="useCases.cardTwo.title">Replace ad hoc dev proxy files with something operationally clearer.</h3>
             <p data-i18n="useCases.cardTwo.body">Keep request shaping, transport selection, metrics, and runtime hooks in one readable service that still feels lightweight.</p>
           </article>
-          <article class="use-case-card">
+          <article class="use-case-card spotlight-card">
             <span class="token" data-i18n="useCases.cardThree.token">thin aggregation edge</span>
             <h3 data-i18n="useCases.cardThree.title">Expose a few composed endpoints without pretending this is a giant platform.</h3>
             <p data-i18n="useCases.cardThree.body">Start with small aggregation and request rewriting work close to the UI, then grow through plugins only where the project really needs it.</p>
           </article>
-          <article class="use-case-card">
+          <article class="use-case-card spotlight-card">
             <span class="token" data-i18n="useCases.cardFour.token">team starter kernel</span>
             <h3 data-i18n="useCases.cardFour.title">Give multiple projects the same BFF baseline without copying proxy glue everywhere.</h3>
             <p data-i18n="useCases.cardFour.body">Use the CLI, examples, and official plugins to standardize a small but consistent runtime across apps.</p>
@@ -198,21 +267,21 @@ bun run dev</code></pre>
         </div>
       </section>
 
-      <section class="section-block panel core-panel">
+      <section class="section-block panel core-panel animate-on-scroll fade-in-up">
         <div class="section-heading">
           <p class="eyebrow" data-i18n="core.eyebrow">Core surface</p>
           <h2 data-i18n="core.title">Three built-ins, then extension points.</h2>
         </div>
         <div class="core-grid">
-          <article class="core-card">
+          <article class="core-card spotlight-card">
             <span class="token">health</span>
             <p data-i18n="core.health">Simple runtime health endpoint that stays public and predictable.</p>
           </article>
-          <article class="core-card">
+          <article class="core-card spotlight-card">
             <span class="token">options</span>
             <p data-i18n="core.options">Serve dictionaries and option data from static or HTTP-backed providers.</p>
           </article>
-          <article class="core-card">
+          <article class="core-card spotlight-card">
             <span class="token">forward</span>
             <p data-i18n="core.forward">Shape and proxy upstream requests with route rules, hooks, and transport strategy selection.</p>
           </article>
@@ -228,23 +297,23 @@ bun run dev</code></pre>
         </div>
       </section>
 
-      <section class="section-block panel compare-panel">
+      <section class="section-block panel compare-panel animate-on-scroll fade-in-up">
         <div class="section-heading">
           <p class="eyebrow" data-i18n="compare.eyebrow">Why this shape</p>
           <h2 data-i18n="compare.title">Sits between a temporary proxy file and a heavyweight backend platform.</h2>
         </div>
         <div class="compare-grid">
-          <article class="compare-card">
+          <article class="compare-card spotlight-card">
             <span class="token" data-i18n="compare.cardOne.token">temporary proxy</span>
             <h3 data-i18n="compare.cardOne.title">Fast to start, easy to outgrow.</h3>
             <p data-i18n="compare.cardOne.body">Good for a quick local redirect, but it usually stops short of shared plugins, explicit runtime services, transport policy, and observability.</p>
           </article>
-          <article class="compare-card compare-card-featured">
+          <article class="compare-card compare-card-featured spotlight-card">
             <span class="token" data-i18n="compare.cardTwo.token">humming</span>
             <h3 data-i18n="compare.cardTwo.title">A small kernel with enough structure to stay readable.</h3>
             <p data-i18n="compare.cardTwo.body">Keep the core narrow, grow through plugins, and make route, forward, and runtime behavior visible enough that teams can actually maintain it.</p>
           </article>
-          <article class="compare-card">
+          <article class="compare-card spotlight-card">
             <span class="token" data-i18n="compare.cardThree.token">heavy framework</span>
             <h3 data-i18n="compare.cardThree.title">Broader surface, more ceremony, different job.</h3>
             <p data-i18n="compare.cardThree.body">Useful when the service itself is the full backend platform, but often more infrastructure and abstraction than a thin frontend-facing BFF needs.</p>
@@ -252,7 +321,7 @@ bun run dev</code></pre>
         </div>
       </section>
 
-      <section class="section-block panel ecosystem-panel" id="ecosystem">
+      <section class="section-block panel ecosystem-panel animate-on-scroll fade-in-up" id="ecosystem">
         <div class="section-heading">
           <p class="eyebrow" data-i18n="ecosystem.eyebrow">Plugin ecosystem</p>
           <h2 data-i18n="ecosystem.title">Grow outward from a stable kernel instead of stuffing optional behavior into core.</h2>
@@ -261,129 +330,138 @@ bun run dev</code></pre>
           <div class="ecosystem-column">
             <p class="mini-label" data-i18n="ecosystem.pluginsLabel">Official plugins</p>
             <div class="plugin-cards">
-              <article class="plugin-card">
-                <h3 data-i18n="ecosystem.auth.title">Auth</h3>
+              <label class="plugin-card spotlight-card plugin-config-label">
+                <div class="plugin-card-header">
+                  <h3 data-i18n="ecosystem.auth.title">Auth</h3>
+                  <input type="checkbox" class="plugin-config-checkbox" value="auth" checked />
+                </div>
                 <p data-i18n="ecosystem.auth.body">Protect routes with bearer checks, JWT validation, and role-based rules.</p>
-              </article>
-              <article class="plugin-card">
-                <h3 data-i18n="ecosystem.cache.title">Cache</h3>
+              </label>
+              <label class="plugin-card spotlight-card plugin-config-label">
+                <div class="plugin-card-header">
+                  <h3 data-i18n="ecosystem.cache.title">Cache</h3>
+                  <input type="checkbox" class="plugin-config-checkbox" value="cache" checked />
+                </div>
                 <p data-i18n="ecosystem.cache.body">Cache eligible responses with memory or Redis-backed stores.</p>
-              </article>
-              <article class="plugin-card">
-                <h3 data-i18n="ecosystem.metrics.title">Metrics</h3>
+              </label>
+              <label class="plugin-card spotlight-card plugin-config-label">
+                <div class="plugin-card-header">
+                  <h3 data-i18n="ecosystem.metrics.title">Metrics</h3>
+                  <input type="checkbox" class="plugin-config-checkbox" value="metrics" />
+                </div>
                 <p data-i18n="ecosystem.metrics.body">Expose Prometheus-style request metrics close to the BFF edge.</p>
-              </article>
-              <article class="plugin-card">
-                <h3 data-i18n="ecosystem.rate.title">Rate limit</h3>
+              </label>
+              <label class="plugin-card spotlight-card plugin-config-label">
+                <div class="plugin-card-header">
+                  <h3 data-i18n="ecosystem.rate.title">Rate limit</h3>
+                  <input type="checkbox" class="plugin-config-checkbox" value="ratelimit" />
+                </div>
                 <p data-i18n="ecosystem.rate.body">Enforce request ceilings per route, user, or custom key strategy.</p>
-              </article>
-              <article class="plugin-card">
-                <h3 data-i18n="ecosystem.cors.title">CORS</h3>
+              </label>
+              <label class="plugin-card spotlight-card plugin-config-label">
+                <div class="plugin-card-header">
+                  <h3 data-i18n="ecosystem.cors.title">CORS</h3>
+                  <input type="checkbox" class="plugin-config-checkbox" value="cors" />
+                </div>
                 <p data-i18n="ecosystem.cors.body">Handle browser-facing preflight and cross-origin policy cleanly.</p>
-              </article>
-              <article class="plugin-card">
-                <h3 data-i18n="ecosystem.options.title">Options</h3>
+              </label>
+              <label class="plugin-card spotlight-card plugin-config-label">
+                <div class="plugin-card-header">
+                  <h3 data-i18n="ecosystem.options.title">Options</h3>
+                  <input type="checkbox" class="plugin-config-checkbox" value="options" checked />
+                </div>
                 <p data-i18n="ecosystem.options.body">Register static and HTTP-backed option sources without cluttering app code.</p>
-              </article>
+              </label>
             </div>
           </div>
-          <div class="ecosystem-column ecosystem-story">
-            <p class="mini-label" data-i18n="ecosystem.strategyLabel">Extension strategy</p>
-            <div class="story-stack">
-              <article>
-                <h3 data-i18n="ecosystem.storyOne.title">Start with official building blocks</h3>
-                <p data-i18n="ecosystem.storyOne.body">Use the shipped plugins for common operational needs instead of inventing one-off middleware in every project.</p>
-              </article>
-              <article>
-                <h3 data-i18n="ecosystem.storyTwo.title">Add custom project plugins</h3>
-                <p data-i18n="ecosystem.storyTwo.body">Register local routes, middleware, option sources, and forward hooks through the same explicit runtime model.</p>
-              </article>
-              <article>
-                <h3 data-i18n="ecosystem.storyThree.title">Leave room for a future ecosystem</h3>
-                <p data-i18n="ecosystem.storyThree.body">`humming` is already shaped for external plugins and presets, but the kernel stays small so the ecosystem can grow without making core fuzzy.</p>
-              </article>
+          
+          <div class="ecosystem-column ecosystem-code-preview spotlight-card">
+            <div class="preview-header">
+              <span class="preview-dot dot-red"></span>
+              <span class="preview-dot dot-yellow"></span>
+              <span class="preview-dot dot-green"></span>
+              <span class="preview-filename" data-i18n="ecosystem.configurator.codeTitle">Generated config (src/main.ts)</span>
             </div>
-            <div class="ecosystem-path">
-              <span data-i18n="ecosystem.path.core">core</span>
-              <span class="arrow">→</span>
-              <span data-i18n="ecosystem.path.official">official plugins</span>
-              <span class="arrow">→</span>
-              <span data-i18n="ecosystem.path.custom">custom plugins</span>
-              <span class="arrow">→</span>
-              <span data-i18n="ecosystem.path.future">future presets</span>
-            </div>
+            <pre><code class="typescript-code" id="configurator-code-block"></code></pre>
           </div>
         </div>
       </section>
 
-      <section class="section-block cli-showcase" id="cli">
+      <section class="section-block cli-showcase animate-on-scroll fade-in-up" id="cli">
         <div class="section-heading">
           <p class="eyebrow" data-i18n="cli.eyebrow">CLI</p>
           <h2 data-i18n="cli.title">Go from empty folder to a working BFF skeleton in one command.</h2>
         </div>
         <div class="cli-grid">
-          <article class="cli-card cli-terminal">
-            <p class="mini-label" data-i18n="cli.scaffoldLabel">Scaffold</p>
-            <pre><code data-i18n="cli.scaffoldCode">bunx humming init acme-bff --template with-plugins
-
-Created acme-bff with the "with-plugins" template.
-
-Next steps:
-  cd acme-bff
-  bun install
-  bun run dev</code></pre>
-          </article>
-          <article class="cli-card cli-layout">
-            <p class="mini-label" data-i18n="cli.shapeLabel">Template shape</p>
-            <pre><code data-i18n="cli.shapeCode">acme-bff/
+          <div class="cli-card cli-terminal spotlight-card">
+            <div class="cli-terminal-header">
+              <div class="cli-terminal-tabs">
+                <button type="button" class="cli-tab-btn is-active" data-cli-cmd="init" data-i18n="cli.terminal.tab.init">Init</button>
+                <button type="button" class="cli-tab-btn" data-cli-cmd="dev" data-i18n="cli.terminal.tab.dev">Dev</button>
+                <button type="button" class="cli-tab-btn" data-cli-cmd="build" data-i18n="cli.terminal.tab.build">Build</button>
+              </div>
+              <div class="cli-terminal-actions">
+                <button type="button" id="cli-btn-run" class="cli-btn cli-btn-run" data-i18n="cli.terminal.btnRun">Run Command</button>
+                <button type="button" id="cli-btn-copy" class="cli-btn cli-btn-copy" data-i18n="cli.terminal.btnCopy">Copy</button>
+              </div>
+            </div>
+            <pre><code id="cli-terminal-body" class="cli-code"><span class="tok-comment"># Click "Run Command" to simulate</span>
+$ bunx humming init my-bff --template with-plugins</code></pre>
+          </div>
+          
+          <div class="cli-sidebar">
+            <article class="cli-card cli-layout spotlight-card">
+              <p class="mini-label" data-i18n="cli.shapeLabel">Template shape</p>
+              <pre><code data-i18n="cli.shapeCode">acme-bff/
   src/
     main.ts
   package.json
   README.md
   .env.example</code></pre>
-          </article>
-          <article class="cli-card cli-templates">
-            <p class="mini-label" data-i18n="cli.templatesLabel">Templates</p>
-            <div class="template-list">
-              <div>
-                <span class="token">basic</span>
-                <p data-i18n="cli.basic">Smallest useful app with core built-ins only.</p>
+            </article>
+            <article class="cli-card cli-templates spotlight-card">
+              <p class="mini-label" data-i18n="cli.templatesLabel">Templates</p>
+              <div class="template-list">
+                <div>
+                  <span class="token">basic</span>
+                  <p data-i18n="cli.basic">Smallest useful app with core built-ins only.</p>
+                </div>
+                <div>
+                  <span class="token">with-plugins</span>
+                  <p data-i18n="cli.plugins">Auth, cache, metrics, rate limit, options, and a custom plugin route.</p>
+                </div>
+                <div>
+                  <span class="token">with-forward</span>
+                  <p data-i18n="cli.forward">Forward rules plus request and response hook examples.</p>
+                </div>
               </div>
-              <div>
-                <span class="token">with-plugins</span>
-                <p data-i18n="cli.plugins">Auth, cache, metrics, rate limit, options, and a custom plugin route.</p>
-              </div>
-              <div>
-                <span class="token">with-forward</span>
-                <p data-i18n="cli.forward">Forward rules plus request and response hook examples.</p>
-              </div>
-            </div>
-          </article>
+            </article>
+          </div>
         </div>
       </section>
 
-      <section class="section-block" id="examples">
+      <section class="section-block animate-on-scroll fade-in-up" id="examples">
         <div class="section-heading">
           <p class="eyebrow" data-i18n="examplesHome.eyebrow">Runnable paths</p>
           <h2 data-i18n="examplesHome.title">Jump from the product story into concrete, runnable examples.</h2>
         </div>
         <div class="doc-grid example-grid">
-          <a class="doc-card" href="./examples/basic/README.md">
+          <a class="doc-card spotlight-card" href="./examples/basic/README.md">
             <span class="token">basic</span>
             <h3 data-i18n="examplesHome.basic.title">Core only</h3>
             <p data-i18n="examplesHome.basic.body">Start with health and options only when you want the smallest useful app shape.</p>
           </a>
-          <a class="doc-card" href="./examples/with-plugins/README.md">
+          <a class="doc-card spotlight-card" href="./examples/with-plugins/README.md">
             <span class="token">with-plugins</span>
             <h3 data-i18n="examplesHome.plugins.title">Operational add-ons</h3>
             <p data-i18n="examplesHome.plugins.body">See auth, cache, metrics, rate limiting, request logging, and options in one app shell.</p>
           </a>
-          <a class="doc-card" href="./examples/with-forward/README.md">
+          <a class="doc-card spotlight-card" href="./examples/with-forward/README.md">
             <span class="token">with-forward</span>
             <h3 data-i18n="examplesHome.forward.title">Forward and hook flow</h3>
             <p data-i18n="examplesHome.forward.body">Use request and response hooks plus transport-aware forwarding when the BFF needs upstream control.</p>
           </a>
-          <a class="doc-card" href="./examples/with-async-plugin/README.md">
+          <a class="doc-card spotlight-card" href="./examples/with-async-plugin/README.md">
             <span class="token">with-async-plugin</span>
             <h3 data-i18n="examplesHome.async.title">Async startup</h3>
             <p data-i18n="examplesHome.async.body">Reach for `createApp()` when plugin setup needs async work before the app is ready.</p>
@@ -391,32 +469,32 @@ Next steps:
         </div>
       </section>
 
-      <section class="section-block" id="docs">
+      <section class="section-block animate-on-scroll fade-in-up" id="docs">
         <div class="section-heading">
           <p class="eyebrow" data-i18n="docs.eyebrow">Documentation</p>
           <h2 data-i18n="docs.title">Start from the entry that matches the job at hand.</h2>
         </div>
         <div class="doc-grid">
-          <a class="doc-card" href="./docs/index.html">
+          <a class="doc-card spotlight-card" href="./docs/index.html">
             <h3 data-i18n="docs.portal.title">Docs portal</h3>
             <p data-i18n="docs.portal.body">Single entry point for overview, plugin system, CLI, transport, production, and benchmark guides.</p>
           </a>
-          <a class="doc-card" href="./docs/overview.md">
+          <a class="doc-card spotlight-card" href="./docs/overview.md">
             <h3 data-i18n="docs.overview.title">Overview</h3>
             <p data-i18n="docs.overview.body">Positioning, architecture boundaries, and how the core is meant to stay small.</p>
           </a>
-          <a class="doc-card" href="./docs/transport.md">
+          <a class="doc-card spotlight-card" href="./docs/transport.md">
             <h3 data-i18n="docs.transport.title">Transport</h3>
             <p data-i18n="docs.transport.body">Keepalive, retry policy, and custom transport strategy boundaries.</p>
           </a>
-          <a class="doc-card" href="./docs/cli.md">
+          <a class="doc-card spotlight-card" href="./docs/cli.md">
             <h3 data-i18n="docs.cli.title">CLI</h3>
             <p data-i18n="docs.cli.body">Scaffold a new app quickly with the Bun-first starter templates.</p>
           </a>
         </div>
       </section>
 
-      <section class="section-block panel signals-panel">
+      <section class="section-block panel signals-panel animate-on-scroll fade-in-up">
         <div class="section-heading">
           <p class="eyebrow" data-i18n="signals.eyebrow">Runtime signals</p>
           <h2 data-i18n="signals.title">Small runtime does not have to mean opaque runtime.</h2>
@@ -425,26 +503,26 @@ Next steps:
           `humming` is trying to stay small without forcing teams to debug blind. Startup summaries, forward timings, hook ownership, transport strategy, and plugin cleanup are meant to stay visible as the app grows.
         </p>
         <div class="signal-grid">
-          <article class="signal-card">
+          <article class="signal-card spotlight-card">
             <h3 data-i18n="signals.cardOne.title">Startup summaries</h3>
             <p data-i18n="signals.cardOne.body">See which plugins were enabled and what each one registered during setup.</p>
           </article>
-          <article class="signal-card">
+          <article class="signal-card spotlight-card">
             <h3 data-i18n="signals.cardTwo.title">Forward phase timing</h3>
             <p data-i18n="signals.cardTwo.body">Split matching, hooks, upstream execution, and error handling into separate timing phases.</p>
           </article>
-          <article class="signal-card">
+          <article class="signal-card spotlight-card">
             <h3 data-i18n="signals.cardThree.title">Hook ownership</h3>
             <p data-i18n="signals.cardThree.body">Track which plugins contributed the active forward hook chain for a request.</p>
           </article>
-          <article class="signal-card">
+          <article class="signal-card spotlight-card">
             <h3 data-i18n="signals.cardFour.title">Explicit teardown</h3>
             <p data-i18n="signals.cardFour.body">Dispose plugin resources cleanly instead of letting timers, clients, and shared handles leak into shutdown.</p>
           </article>
         </div>
       </section>
 
-      <section class="section-block panel ops-home-panel" id="ops-home">
+      <section class="section-block panel ops-home-panel animate-on-scroll fade-in-up" id="ops-home">
         <div class="section-heading">
           <p class="eyebrow" data-i18n="opsHome.eyebrow">Transport and operations</p>
           <h2 data-i18n="opsHome.title">The runtime is small, but the operational surface is still intentional.</h2>
@@ -453,26 +531,26 @@ Next steps:
           `humming` keeps `forward` in core because upstream control is a real BFF concern. That means transport policy, rollout boundaries, regression baselines, and observability deserve first-class guidance instead of scattered notes.
         </p>
         <div class="doc-grid ops-home-grid">
-          <a class="doc-card" href="./docs/transport.md">
+          <a class="doc-card spotlight-card" href="./docs/transport.md">
             <h3 data-i18n="opsHome.transport.title">Transport</h3>
             <p data-i18n="opsHome.transport.body">Choose between baseline fetch, keepalive-oriented fetch, retrying fetch, or a custom transport contract.</p>
           </a>
-          <a class="doc-card" href="./docs/production.md">
+          <a class="doc-card spotlight-card" href="./docs/production.md">
             <h3 data-i18n="opsHome.production.title">Production</h3>
             <p data-i18n="opsHome.production.body">Read the deployment model, forward safety stance, metrics guidance, and cache and auth boundaries.</p>
           </a>
-          <a class="doc-card" href="./docs/benchmark.md">
+          <a class="doc-card spotlight-card" href="./docs/benchmark.md">
             <h3 data-i18n="opsHome.benchmark.title">Benchmark</h3>
             <p data-i18n="opsHome.benchmark.body">Compare direct upstream traffic against forwarded traffic before you change runtime behavior.</p>
           </a>
-          <a class="doc-card" href="./docs/roadmap.md">
+          <a class="doc-card spotlight-card" href="./docs/roadmap.md">
             <h3 data-i18n="opsHome.roadmap.title">Roadmap</h3>
             <p data-i18n="opsHome.roadmap.body">See where plugin lifecycle, observability, and broader platform maturity are heading next.</p>
           </a>
         </div>
       </section>
 
-      <section class="section-block panel final-cta">
+      <section class="section-block panel final-cta animate-on-scroll fade-in-up">
         <div>
           <p class="eyebrow" data-i18n="final.eyebrow">Start here</p>
           <h2 data-i18n="final.title">If your team wants a thin BFF with clear boundaries, this is the point of entry.</h2>
