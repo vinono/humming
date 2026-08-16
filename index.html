@@ -6,574 +6,592 @@
     <title data-i18n="meta.title">humming | Plugin-first lightweight BFF core for Bun</title>
     <meta
       name="description"
-      content="humming is a plugin-first lightweight BFF core for Bun. Start with health, options, and forward, then extend with plugins and a Bun-first CLI."
+      content="humming is a plugin-first lightweight BFF core for Bun. Experience high-throughput, low-latency BFF routing inspired by ambient soundscapes."
       data-i18n="meta.description"
       data-i18n-attr="content"
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./site/styles.css" />
     <script defer src="./site/i18n.js"></script>
+    <script defer src="./site/soundscape.js"></script>
     <script defer src="./site/effects.js"></script>
   </head>
   <body class="page-shell" data-page="home">
+    <!-- Ambient Soundscape Canvas Backdrop -->
     <div class="site-backdrop" aria-hidden="true">
-      <div class="glow glow-cyan"></div>
-      <div class="glow glow-amber"></div>
-      <div class="grid-noise"></div>
+      <canvas id="soundscape-canvas"></canvas>
+      <div class="ambient-aura aura-1"></div>
+      <div class="ambient-aura aura-2"></div>
+      <div class="ambient-aura aura-3"></div>
+      <div class="subtle-noise"></div>
     </div>
 
-    <header class="topbar">
-      <a
-        class="brand-lockup"
-        href="./index.html"
-        aria-label="humming home"
-        data-i18n="brand.homeAria"
-        data-i18n-attr="aria-label"
-      >
-        <img
-          src="./assets/brand/humming-mark.svg"
-          alt=""
-          width="40"
-          height="40"
-        />
-        <span>humming</span>
-      </a>
-      <div class="topbar-controls">
-        <nav class="topnav">
-          <a href="#use-cases" data-i18n="nav.useCases">Use Cases</a>
-          <a href="#examples" data-i18n="nav.examples">Examples</a>
-          <a href="#cli" data-i18n="nav.cli">CLI</a>
-          <a href="#ops-home" data-i18n="nav.ops">Ops</a>
-          <a href="#docs" data-i18n="nav.docs">Docs</a>
-        </nav>
-        <div
-          class="lang-switch"
-          role="group"
-          aria-label="Language switch"
-          data-i18n="lang.switchLabel"
+    <!-- Floating Top Navigation -->
+    <div class="topbar-wrapper">
+      <header class="topbar">
+        <a
+          class="brand-lockup"
+          href="./index.html"
+          aria-label="humming home"
+          data-i18n="brand.homeAria"
           data-i18n-attr="aria-label"
         >
-          <button type="button" class="lang-button" data-lang-switch="en">EN</button>
-          <button type="button" class="lang-button" data-lang-switch="zh">中文</button>
+          <img
+            class="brand-logo-img"
+            src="./assets/brand/humming-mark.svg"
+            alt="humming"
+            width="32"
+            height="32"
+          />
+          <span>humming</span>
+        </a>
+
+        <nav class="topnav" aria-label="Main Navigation">
+          <a class="nav-link" href="#modes" data-i18n="nav.modes">Modes</a>
+          <a class="nav-link" href="#benchmarks" data-i18n="nav.benchmarks">Benchmarks</a>
+          <a class="nav-link" href="#pipeline" data-i18n="nav.pipeline">Pipeline</a>
+          <a class="nav-link" href="#plugins" data-i18n="nav.plugins">Plugins</a>
+          <a class="nav-link" href="#cli" data-i18n="nav.cli">CLI</a>
+          <a class="nav-link" href="./docs/index.html" data-i18n="nav.docs">Docs</a>
+        </nav>
+
+        <div class="topbar-actions">
+          <!-- Language Switcher -->
+          <div
+            class="lang-switch"
+            role="group"
+            aria-label="Language switch"
+            data-i18n="lang.switchLabel"
+            data-i18n-attr="aria-label"
+          >
+            <button type="button" class="lang-btn active" data-lang-switch="en">EN</button>
+            <button type="button" class="lang-btn" data-lang-switch="zh">中文</button>
+          </div>
+
+          <a class="btn-topbar-cta" href="./docs/index.html" data-i18n="hero.ctaDocs">Docs ↗</a>
         </div>
-      </div>
-    </header>
+      </header>
+    </div>
 
     <main>
-      <section class="hero panel animate-on-scroll fade-in-up">
-        <div class="hero-copy">
-          <div class="hero-ribbon">
-            <span class="ribbon-dot"></span>
-            <span>v0.1.0</span>
-            <span class="ribbon-separator">/</span>
-            <span data-i18n="hero.ribbon">Bun-first BFF core</span>
+      <!-- Hero Section -->
+      <section class="hero-section">
+        <div class="container">
+          <div class="hero-badge-pill animate-on-scroll">
+            <span class="status-dot"></span>
+            <span data-i18n="hero.ribbon">Bun-first BFF core v0.1.0</span>
           </div>
-          <p class="eyebrow" data-i18n="hero.eyebrow">Thin BFF kernel for frontend-owned backends</p>
-          <h1 data-i18n="hero.title">Build a small BFF on Bun without dragging in a full backend framework.</h1>
-          <p class="lede" data-i18n="hero.lede">
-            `humming` keeps the core deliberately narrow: `health`, `options`,
-            and `forward`. Everything else stays composable through plugins,
-            hooks, and explicit runtime configuration.
-          </p>
-          <div class="cta-row">
-            <a class="button button-primary" href="./docs/index.html" data-i18n="hero.ctaDocs">Open Docs</a>
-            <a class="button button-secondary" href="https://github.com/vinono/humming" data-i18n="hero.ctaGithub">View on GitHub</a>
-          </div>
-          <div class="hero-pills" aria-label="project highlights">
-            <span data-i18n="hero.pillBun">Bun-first</span>
-            <span data-i18n="hero.pillPlugin">Plugin-first</span>
-            <span data-i18n="hero.pillCli">CLI included</span>
-            <span data-i18n="hero.pillTransport">Transport-aware forward</span>
-          </div>
-          <div class="hero-stats" aria-label="project stats">
-            <article class="spotlight-card">
-              <strong>3</strong>
-              <span data-i18n="hero.stats.core">core built-ins</span>
-            </article>
-            <article class="spotlight-card">
-              <strong>8</strong>
-              <span data-i18n="hero.stats.plugins">official plugins</span>
-            </article>
-            <article class="spotlight-card">
-              <strong>3</strong>
-              <span data-i18n="hero.stats.templates">starter templates</span>
-            </article>
-            <article class="spotlight-card">
-              <strong>1</strong>
-              <span data-i18n="hero.stats.boundary">clear boundary</span>
-            </article>
-          </div>
-        </div>
 
-        <div class="hero-card hero-interactive-card spotlight-card">
-          <div class="hero-card-tabs">
-            <button type="button" class="hero-tab-btn is-active" data-tab="quickstart" data-i18n="hero.tab.quickstart">Quick Start</button>
-            <button type="button" class="hero-tab-btn" data-tab="simulator" data-i18n="hero.tab.simulator">BFF Simulator</button>
+          <h1 class="hero-title animate-on-scroll">
+            <span class="gradient-text" data-i18n="hero.title">The Sound of Fast, Thin Backends on Bun.</span>
+          </h1>
+
+          <p class="hero-description animate-on-scroll" data-i18n="hero.lede">
+            Humming keeps the core deliberately narrow: health, options, and forward. Compose auth, cache, and metrics through a reactive plugin mesh.
+          </p>
+
+          <div class="hero-actions animate-on-scroll">
+            <div
+              class="cli-quick-pill"
+              data-copy-text="bunx humming init my-bff"
+              title="Click to copy start command"
+            >
+              <span style="color:var(--text-subtle); font-weight:normal;">$</span>
+              <span class="cli-code-text" data-i18n="hero.cliCopy">bunx humming init my-bff</span>
+              <svg class="cli-copy-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+            </div>
+
+            <a class="btn-primary" href="./docs/index.html" data-i18n="hero.ctaDocs">Explore Docs ↗</a>
+            <a class="btn-secondary" href="https://github.com/vinono/humming" target="_blank" rel="noopener noreferrer" data-i18n="hero.ctaGithub">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="margin-right:4px;">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+              </svg>
+              GitHub
+            </a>
           </div>
-          <div class="hero-card-panels">
-            <!-- Quick Start Panel -->
-            <div class="hero-panel-content is-active" id="hero-panel-quickstart">
-              <p class="mini-label" data-i18n="hero.quickstart.label">Quick start</p>
-              <pre><code data-i18n="hero.quickstart.code">bunx humming init my-bff --template with-forward
-cd my-bff
-bun install
-bun run dev</code></pre>
-              <div class="mini-console">
-                <p class="mini-label" data-i18n="hero.console.label">What you get</p>
-                <div class="console-lines">
-                  <span data-i18n="hero.console.one">+ health endpoint</span>
-                  <span data-i18n="hero.console.two">+ options routes</span>
-                  <span data-i18n="hero.console.three">+ forward rules</span>
-                  <span data-i18n="hero.console.four">+ plugin-ready app shell</span>
+
+          <!-- Endel-Style Soundscape Hero Visualizer Player -->
+          <div class="hero-player-wrap animate-on-scroll">
+            <div class="hero-player-header">
+              <div class="player-mode-indicators">
+                <button type="button" class="mode-tag is-active" data-sound-mode="fast-path" data-i18n="player.modeFast">Fast-Path</button>
+                <button type="button" class="mode-tag" data-sound-mode="plugin-mesh" data-i18n="player.modeMesh">Plugin Mesh</button>
+                <button type="button" class="mode-tag" data-sound-mode="forward" data-i18n="player.modeForward">Forward</button>
+                <button type="button" class="mode-tag" data-sound-mode="minimal" data-i18n="player.modeMinimal">Minimal</button>
+              </div>
+
+              <div class="player-telemetry">
+                <div class="telemetry-item">
+                  <span data-i18n="player.telemetryRps">Throughput</span>:
+                  <strong class="val-cyan" id="telemetry-rps-val">182,400 req/s</strong>
+                </div>
+                <div class="telemetry-item">
+                  <span data-i18n="player.telemetryLatency">Proxy Latency</span>:
+                  <strong class="val-emerald">&lt; 0.45 ms</strong>
+                </div>
+                <div class="telemetry-item">
+                  <span data-i18n="player.telemetryMem">Memory</span>:
+                  <strong>16.4 MB</strong>
                 </div>
               </div>
             </div>
-            <!-- Simulator Panel -->
-            <div class="hero-panel-content" id="hero-panel-simulator">
-              <div class="simulator-route-selector">
-                <label for="sim-route-select" class="mini-label" data-i18n="hero.sim.routeLabel">Choose Route:</label>
-                <div class="selector-wrapper">
-                  <select id="sim-route-select">
-                    <option value="/health">GET /health (built-in)</option>
-                    <option value="/options">GET /options (plugin option data)</option>
-                    <option value="/api/users">GET /api/users (auth + forward + cache)</option>
+
+            <div class="hero-wave-canvas-container">
+              <canvas id="hero-wave-canvas"></canvas>
+              <div class="player-center-meta">
+                <div class="meta-title" data-i18n="player.metaTitle">humming kernel monitor</div>
+                <div class="meta-sub" data-i18n="player.metaSub">Zero-Copy Stream Pipeline · Bun Native Runtime</div>
+              </div>
+            </div>
+
+            <div class="hero-player-footer">
+              <div class="player-footer-left">
+                <span class="status-dot"></span>
+                <span class="player-waveform-desc" data-i18n="player.canvasDesc">Live event-loop traffic monitor responding to Bun kernel throughput dynamics.</span>
+              </div>
+              <div style="font-family:'JetBrains Mono', monospace; font-size:0.78rem; color:var(--text-subtle);">
+                BUFFER: 0ms · GC: ULTRA-LOW · ZERO-COPY
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Ecosystem & Runtime Partners -->
+      <section class="ecosystem-section animate-on-scroll">
+        <div class="container">
+          <div class="ecosystem-label" data-i18n="eco.label">Built with and powered by the modern runtime ecosystem</div>
+          <div class="ecosystem-grid">
+            <div class="eco-item">
+              <svg class="eco-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9v-2h2v2zm0-4H9V7h2v5z"/></svg>
+              <span>Bun v1.3+</span>
+            </div>
+            <div class="eco-item">
+              <svg class="eco-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/></svg>
+              <span>Hono Routing Engine</span>
+            </div>
+            <div class="eco-item">
+              <svg class="eco-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M2.5 4v16h19V4H2.5zm16.5 13.5h-2.1v-1.8h2.1v1.8zm0-3.3h-2.1V7.5h2.1v6.7zM11.5 17.5H9.4v-1.8h2.1v1.8zm0-3.3H9.4V7.5h2.1v6.7z"/></svg>
+              <span>TypeScript 5.x</span>
+            </div>
+            <div class="eco-item">
+              <svg class="eco-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 14.5h-2v-2h2v2zm0-4h-2V7h2v5.5z"/></svg>
+              <span>Prometheus Metrics</span>
+            </div>
+            <div class="eco-item">
+              <svg class="eco-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              <span>Cloudflare & Edge Ready</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Circadian & Runtime Mode Showcase (对标 Endel 4 核心交互模式) -->
+      <section id="modes" class="modes-section">
+        <div class="container">
+          <span class="section-eyebrow animate-on-scroll" data-i18n="modes.eyebrow">Architectural States</span>
+          <h2 class="section-title animate-on-scroll" data-i18n="modes.title">Harmonic Runtime Modes</h2>
+          <p class="section-subtitle animate-on-scroll" data-i18n="modes.subtitle">
+            Switch between dedicated operational modes designed to balance raw performance, flexibility, and frontend developer experience.
+          </p>
+
+          <div class="modes-grid">
+            <!-- Mode 1 -->
+            <article class="mode-card animate-on-scroll" data-mode-card="fast-path" style="--card-glow: rgba(56, 189, 248, 0.2);">
+              <div class="mode-card-top">
+                <span class="mode-number" data-i18n="modes.card1.num">01 / SPEED</span>
+                <h3 class="mode-card-title" data-i18n="modes.card1.title">Kernel Fast-Path</h3>
+                <p class="mode-card-desc" data-i18n="modes.card1.desc">
+                  Sub-millisecond route dispatching built on Bun native primitives and Hono with zero intermediate overhead.
+                </p>
+              </div>
+              <div class="mode-card-bottom">
+                <div class="mode-pill-action">
+                  <span data-i18n="modes.card1.action">Inspect Kernel</span> <span>→</span>
+                </div>
+              </div>
+            </article>
+
+            <!-- Mode 2 -->
+            <article class="mode-card animate-on-scroll" data-mode-card="plugin-mesh" style="--card-glow: rgba(244, 114, 182, 0.2);">
+              <div class="mode-card-top">
+                <span class="mode-number" data-i18n="modes.card2.num">02 / EXTENSIBILITY</span>
+                <h3 class="mode-card-title" data-i18n="modes.card2.title">Plugin Mesh</h3>
+                <p class="mode-card-desc" data-i18n="modes.card2.desc">
+                  Composable lifecycle hooks allow injecting auth guards, caching layers, and rate limiters without polluting core logic.
+                </p>
+              </div>
+              <div class="mode-card-bottom">
+                <div class="mode-pill-action">
+                  <span data-i18n="modes.card2.action">Explore Plugins</span> <span>→</span>
+                </div>
+              </div>
+            </article>
+
+            <!-- Mode 3 -->
+            <article class="mode-card animate-on-scroll" data-mode-card="forward" style="--card-glow: rgba(52, 211, 153, 0.2);">
+              <div class="mode-card-top">
+                <span class="mode-number" data-i18n="modes.card3.num">03 / RELIABILITY</span>
+                <h3 class="mode-card-title" data-i18n="modes.card3.title">Transport Forward</h3>
+                <p class="mode-card-desc" data-i18n="modes.card3.desc">
+                  Upstream proxying with transport-aware strategies, zero-copy streaming, timeout interception, and automatic retries.
+                </p>
+              </div>
+              <div class="mode-card-bottom">
+                <div class="mode-pill-action">
+                  <span data-i18n="modes.card3.action">View Forward Rules</span> <span>→</span>
+                </div>
+              </div>
+            </article>
+
+            <!-- Mode 4 -->
+            <article class="mode-card animate-on-scroll" data-mode-card="minimal" style="--card-glow: rgba(168, 85, 247, 0.2);">
+              <div class="mode-card-top">
+                <span class="mode-number" data-i18n="modes.card4.num">04 / SIMPLICITY</span>
+                <h3 class="mode-card-title" data-i18n="modes.card4.title">Frontend-Owned</h3>
+                <p class="mode-card-desc" data-i18n="modes.card4.desc">
+                  No heavy controller hierarchies or enterprise gateway ceremony. Pure TypeScript configuration tailored for UI teams.
+                </p>
+              </div>
+              <div class="mode-card-bottom">
+                <div class="mode-pill-action">
+                  <span data-i18n="modes.card4.action">See Examples</span> <span>→</span>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- Backed by Benchmarks & Performance (对标 Endel Backed by Neuroscience) -->
+      <section id="benchmarks" class="benchmarks-section">
+        <div class="container">
+          <span class="section-eyebrow animate-on-scroll" data-i18n="benchmarks.eyebrow">Backed by Benchmarks</span>
+          <h2 class="section-title animate-on-scroll" data-i18n="benchmarks.title">Engineered for Radical Performance</h2>
+          <p class="section-subtitle animate-on-scroll" data-i18n="benchmarks.subtitle">
+            By stripping away bloated legacy runtime layers, Humming achieves ultra-fast response times and minimal server resource consumption.
+          </p>
+
+          <div class="benchmarks-grid">
+            <!-- Stat 1 -->
+            <div class="stat-card animate-on-scroll">
+              <div class="stat-illustration">
+                <svg viewBox="0 0 160 80" fill="none" stroke="currentColor">
+                  <path d="M10 70 Q 50 65, 80 40 T 150 10" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/>
+                  <circle cx="150" cy="10" r="4" fill="#38bdf8"/>
+                  <path d="M10 70 H150" stroke="rgba(255,255,255,0.1)" stroke-dasharray="4 4"/>
+                </svg>
+              </div>
+              <div class="stat-metric cyan" data-i18n="benchmarks.stat1.val">7.2x</div>
+              <div class="stat-label" data-i18n="benchmarks.stat1.title">Higher Throughput</div>
+              <div class="stat-subtext" data-i18n="benchmarks.stat1.sub">vs standard Express/Node.js BFF gateways on equal CPU cores.</div>
+            </div>
+
+            <!-- Stat 2 -->
+            <div class="stat-card animate-on-scroll">
+              <div class="stat-illustration">
+                <svg viewBox="0 0 160 80" fill="none" stroke="currentColor">
+                  <path d="M10 15 H 130 Q 145 15, 150 70" stroke="#34d399" stroke-width="2.5" stroke-linecap="round"/>
+                  <circle cx="150" cy="70" r="4" fill="#34d399"/>
+                  <path d="M10 70 H150" stroke="rgba(255,255,255,0.1)" stroke-dasharray="4 4"/>
+                </svg>
+              </div>
+              <div class="stat-metric emerald" data-i18n="benchmarks.stat2.val">&lt;0.6ms</div>
+              <div class="stat-label" data-i18n="benchmarks.stat2.title">Proxy Overhead</div>
+              <div class="stat-subtext" data-i18n="benchmarks.stat2.sub">Ultra-low hop latency between client and upstream microservices.</div>
+            </div>
+
+            <!-- Stat 3 -->
+            <div class="stat-card animate-on-scroll">
+              <div class="stat-illustration">
+                <svg viewBox="0 0 160 80" fill="none" stroke="currentColor">
+                  <rect x="20" y="25" width="120" height="35" rx="8" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                  <rect x="24" y="29" width="30" height="27" rx="5" fill="#818cf8" opacity="0.8"/>
+                </svg>
+              </div>
+              <div class="stat-metric" data-i18n="benchmarks.stat3.val">16MB</div>
+              <div class="stat-label" data-i18n="benchmarks.stat3.title">Base Memory</div>
+              <div class="stat-subtext" data-i18n="benchmarks.stat3.sub">Idle footprint allows scaling hundreds of isolated edge instances.</div>
+            </div>
+
+            <!-- Stat 4 -->
+            <div class="stat-card animate-on-scroll">
+              <div class="stat-illustration">
+                <svg viewBox="0 0 160 80" fill="none" stroke="currentColor">
+                  <circle cx="80" cy="40" r="30" stroke="#c084fc" stroke-width="2.5"/>
+                  <path d="M70 40 L78 48 L92 32" stroke="#c084fc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="stat-metric" data-i18n="benchmarks.stat4.val">100%</div>
+              <div class="stat-label" data-i18n="benchmarks.stat4.title">TypeScript Native</div>
+              <div class="stat-subtext" data-i18n="benchmarks.stat4.sub">Zero compile step required with Bun first-class execution.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Interactive Request Pipeline Simulator -->
+      <section id="pipeline" class="pipeline-section">
+        <div class="container">
+          <div class="pipeline-box animate-on-scroll">
+            <div class="pipeline-toolbar">
+              <div>
+                <span class="section-eyebrow" data-i18n="pipeline.eyebrow">Interactive Flow</span>
+                <h3 style="font-size:1.6rem; font-weight:700; color:var(--text-primary);" data-i18n="pipeline.title">Live Pipeline Visualizer</h3>
+                <p style="font-size:0.9rem; color:var(--text-muted); margin-top:4px;" data-i18n="pipeline.subtitle">
+                  Trigger simulated requests to watch packets propagate through middleware hooks, kernel routing, and upstream dispatch.
+                </p>
+              </div>
+
+              <div class="pipeline-controls">
+                <div class="route-select-wrapper">
+                  <select id="pipeline-route-select" aria-label="Select target route">
+                    <option value="/api/options?keys=teams">GET /api/options?keys=teams</option>
+                    <option value="/api/protected/user">GET /api/protected/user (Auth)</option>
+                    <option value="/forward/catalog">POST /forward/catalog (Proxy)</option>
+                    <option value="/health">GET /health (Built-in)</option>
                   </select>
-                  <button type="button" id="sim-send-btn" class="button button-primary" data-i18n="hero.sim.sendBtn">Send Request</button>
                 </div>
-              </div>
-
-              <!-- Animated Diagram Grid -->
-              <div class="sim-diagram">
-                <div class="sim-node" id="node-client">
-                  <span class="node-icon">💻</span>
-                  <span class="node-name" data-i18n="hero.sim.node.client">Client</span>
-                </div>
-                <div class="sim-line-container">
-                  <div class="sim-line" id="line-client-plugins"></div>
-                </div>
-                <div class="sim-node" id="node-plugins">
-                  <span class="node-icon">🛡️</span>
-                  <span class="node-name" data-i18n="hero.sim.node.plugins">Plugins</span>
-                </div>
-                <div class="sim-line-container">
-                  <div class="sim-line" id="line-plugins-core"></div>
-                </div>
-                <div class="sim-node" id="node-core">
-                  <span class="node-icon">🐝</span>
-                  <span class="node-name" data-i18n="hero.sim.node.core">BFF Core</span>
-                </div>
-                <div class="sim-line-container">
-                  <div class="sim-line" id="line-core-upstream"></div>
-                </div>
-                <div class="sim-node" id="node-upstream">
-                  <span class="node-icon">☁️</span>
-                  <span class="node-name" data-i18n="hero.sim.node.upstream">Upstream</span>
-                </div>
-              </div>
-
-              <!-- Real-time Console Logs -->
-              <div class="sim-console">
-                <div class="sim-console-header">
-                  <span data-i18n="hero.sim.consoleLabel">Live BFF logs</span>
-                  <button type="button" id="sim-clear-btn" class="sim-btn-clear" data-i18n="hero.sim.clearBtn">Clear Logs</button>
-                </div>
-                <div class="sim-console-body" id="sim-console-body">
-                  <p class="log-line log-system"><span class="log-time">[Ready]</span> BFF Server initialized and listening on port 3000</p>
-                </div>
+                <button type="button" class="btn-pulse-trigger" id="pipeline-trigger-btn">
+                  <span>⚡</span>
+                  <span data-i18n="pipeline.send">Fire Request</span>
+                </button>
               </div>
             </div>
-          </div>
-          <!-- Shared mini info cards at the bottom -->
-          <div class="mini-grid">
-            <article class="spotlight-card">
-              <h2 data-i18n="hero.cardOne.title">Core stays small</h2>
-              <p data-i18n="hero.cardOne.body">Keep `health`, `options`, and `forward` in core and move optional behavior into plugins.</p>
-            </article>
-            <article class="spotlight-card">
-              <h2 data-i18n="hero.cardTwo.title">Scale by composition</h2>
-              <p data-i18n="hero.cardTwo.body">Add auth, cache, metrics, rate limit, or custom routes only where the project actually needs them.</p>
-            </article>
-          </div>
-        </div>
-      </section>
 
-      <section class="section-block animate-on-scroll fade-in-up">
-        <div class="section-heading">
-          <p class="eyebrow" data-i18n="fit.eyebrow">Where it fits</p>
-          <h2 data-i18n="fit.title">Built for thin BFFs, local proxy layers, and frontend teams that want control.</h2>
-        </div>
-        <div class="feature-grid">
-          <article class="feature-card spotlight-card">
-            <h3 data-i18n="fit.cardOne.title">Good fit</h3>
-            <ul>
-              <li data-i18n="fit.cardOne.one">project-level BFFs</li>
-              <li data-i18n="fit.cardOne.two">local routes and small aggregations</li>
-              <li data-i18n="fit.cardOne.three">upstream forwarding with explicit hooks</li>
-              <li data-i18n="fit.cardOne.four">frontend-owned runtime extensions</li>
-            </ul>
-          </article>
-          <article class="feature-card spotlight-card">
-            <h3 data-i18n="fit.cardTwo.title">Not trying to be</h3>
-            <ul>
-              <li data-i18n="fit.cardTwo.one">a full API gateway</li>
-              <li data-i18n="fit.cardTwo.two">a heavy backend application framework</li>
-              <li data-i18n="fit.cardTwo.three">a hidden-convention platform</li>
-              <li data-i18n="fit.cardTwo.four">an everything-in-core runtime</li>
-            </ul>
-          </article>
-          <article class="feature-card spotlight-card">
-            <h3 data-i18n="fit.cardThree.title">Key runtime ideas</h3>
-            <ul>
-              <li data-i18n="fit.cardThree.one">plugin-first extension model</li>
-              <li data-i18n="fit.cardThree.two">explicit forward transport strategy</li>
-              <li data-i18n="fit.cardThree.three">shared services across plugins</li>
-              <li data-i18n="fit.cardThree.four">small surface area with readable behavior</li>
-            </ul>
-          </article>
-        </div>
-      </section>
-
-      <section class="section-block animate-on-scroll fade-in-up" id="use-cases">
-        <div class="section-heading">
-          <p class="eyebrow" data-i18n="useCases.eyebrow">Use cases</p>
-          <h2 data-i18n="useCases.title">Use it where teams need a thin edge layer, not a giant backend surface.</h2>
-        </div>
-        <div class="use-case-grid">
-          <article class="use-case-card spotlight-card">
-            <span class="token" data-i18n="useCases.cardOne.token">frontend-owned bff</span>
-            <h3 data-i18n="useCases.cardOne.title">Ship a small backend the frontend team can actually maintain.</h3>
-            <p data-i18n="useCases.cardOne.body">Add local routes, option endpoints, auth guards, and upstream forwarding without pulling the project into a controller-heavy backend stack.</p>
-          </article>
-          <article class="use-case-card spotlight-card">
-            <span class="token" data-i18n="useCases.cardTwo.token">local proxy layer</span>
-            <h3 data-i18n="useCases.cardTwo.title">Replace ad hoc dev proxy files with something operationally clearer.</h3>
-            <p data-i18n="useCases.cardTwo.body">Keep request shaping, transport selection, metrics, and runtime hooks in one readable service that still feels lightweight.</p>
-          </article>
-          <article class="use-case-card spotlight-card">
-            <span class="token" data-i18n="useCases.cardThree.token">thin aggregation edge</span>
-            <h3 data-i18n="useCases.cardThree.title">Expose a few composed endpoints without pretending this is a giant platform.</h3>
-            <p data-i18n="useCases.cardThree.body">Start with small aggregation and request rewriting work close to the UI, then grow through plugins only where the project really needs it.</p>
-          </article>
-          <article class="use-case-card spotlight-card">
-            <span class="token" data-i18n="useCases.cardFour.token">team starter kernel</span>
-            <h3 data-i18n="useCases.cardFour.title">Give multiple projects the same BFF baseline without copying proxy glue everywhere.</h3>
-            <p data-i18n="useCases.cardFour.body">Use the CLI, examples, and official plugins to standardize a small but consistent runtime across apps.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="section-block panel core-panel animate-on-scroll fade-in-up">
-        <div class="section-heading">
-          <p class="eyebrow" data-i18n="core.eyebrow">Core surface</p>
-          <h2 data-i18n="core.title">Three built-ins, then extension points.</h2>
-        </div>
-        <div class="core-grid">
-          <article class="core-card spotlight-card">
-            <span class="token">health</span>
-            <p data-i18n="core.health">Simple runtime health endpoint that stays public and predictable.</p>
-          </article>
-          <article class="core-card spotlight-card">
-            <span class="token">options</span>
-            <p data-i18n="core.options">Serve dictionaries and option data from static or HTTP-backed providers.</p>
-          </article>
-          <article class="core-card spotlight-card">
-            <span class="token">forward</span>
-            <p data-i18n="core.forward">Shape and proxy upstream requests with route rules, hooks, and transport strategy selection.</p>
-          </article>
-        </div>
-        <div class="architecture-strip">
-          <span data-i18n="core.flow.client">client</span>
-          <span class="arrow">→</span>
-          <span data-i18n="core.flow.core">humming core</span>
-          <span class="arrow">→</span>
-          <span data-i18n="core.flow.plugins">plugins</span>
-          <span class="arrow">→</span>
-          <span data-i18n="core.flow.upstream">upstream services</span>
-        </div>
-      </section>
-
-      <section class="section-block panel compare-panel animate-on-scroll fade-in-up">
-        <div class="section-heading">
-          <p class="eyebrow" data-i18n="compare.eyebrow">Why this shape</p>
-          <h2 data-i18n="compare.title">Sits between a temporary proxy file and a heavyweight backend platform.</h2>
-        </div>
-        <div class="compare-grid">
-          <article class="compare-card spotlight-card">
-            <span class="token" data-i18n="compare.cardOne.token">temporary proxy</span>
-            <h3 data-i18n="compare.cardOne.title">Fast to start, easy to outgrow.</h3>
-            <p data-i18n="compare.cardOne.body">Good for a quick local redirect, but it usually stops short of shared plugins, explicit runtime services, transport policy, and observability.</p>
-          </article>
-          <article class="compare-card compare-card-featured spotlight-card">
-            <span class="token" data-i18n="compare.cardTwo.token">humming</span>
-            <h3 data-i18n="compare.cardTwo.title">A small kernel with enough structure to stay readable.</h3>
-            <p data-i18n="compare.cardTwo.body">Keep the core narrow, grow through plugins, and make route, forward, and runtime behavior visible enough that teams can actually maintain it.</p>
-          </article>
-          <article class="compare-card spotlight-card">
-            <span class="token" data-i18n="compare.cardThree.token">heavy framework</span>
-            <h3 data-i18n="compare.cardThree.title">Broader surface, more ceremony, different job.</h3>
-            <p data-i18n="compare.cardThree.body">Useful when the service itself is the full backend platform, but often more infrastructure and abstraction than a thin frontend-facing BFF needs.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="section-block panel ecosystem-panel animate-on-scroll fade-in-up" id="ecosystem">
-        <div class="section-heading">
-          <p class="eyebrow" data-i18n="ecosystem.eyebrow">Plugin ecosystem</p>
-          <h2 data-i18n="ecosystem.title">Grow outward from a stable kernel instead of stuffing optional behavior into core.</h2>
-        </div>
-        <div class="ecosystem-grid">
-          <div class="ecosystem-column">
-            <p class="mini-label" data-i18n="ecosystem.pluginsLabel">Official plugins</p>
-            <div class="plugin-cards">
-              <label class="plugin-card spotlight-card plugin-config-label">
-                <div class="plugin-card-header">
-                  <h3 data-i18n="ecosystem.auth.title">Auth</h3>
-                  <input type="checkbox" class="plugin-config-checkbox" value="auth" checked />
-                </div>
-                <p data-i18n="ecosystem.auth.body">Protect routes with bearer checks, JWT validation, and role-based rules.</p>
-              </label>
-              <label class="plugin-card spotlight-card plugin-config-label">
-                <div class="plugin-card-header">
-                  <h3 data-i18n="ecosystem.cache.title">Cache</h3>
-                  <input type="checkbox" class="plugin-config-checkbox" value="cache" checked />
-                </div>
-                <p data-i18n="ecosystem.cache.body">Cache eligible responses with memory or Redis-backed stores.</p>
-              </label>
-              <label class="plugin-card spotlight-card plugin-config-label">
-                <div class="plugin-card-header">
-                  <h3 data-i18n="ecosystem.metrics.title">Metrics</h3>
-                  <input type="checkbox" class="plugin-config-checkbox" value="metrics" />
-                </div>
-                <p data-i18n="ecosystem.metrics.body">Expose Prometheus-style request metrics close to the BFF edge.</p>
-              </label>
-              <label class="plugin-card spotlight-card plugin-config-label">
-                <div class="plugin-card-header">
-                  <h3 data-i18n="ecosystem.rate.title">Rate limit</h3>
-                  <input type="checkbox" class="plugin-config-checkbox" value="ratelimit" />
-                </div>
-                <p data-i18n="ecosystem.rate.body">Enforce request ceilings per route, user, or custom key strategy.</p>
-              </label>
-              <label class="plugin-card spotlight-card plugin-config-label">
-                <div class="plugin-card-header">
-                  <h3 data-i18n="ecosystem.cors.title">CORS</h3>
-                  <input type="checkbox" class="plugin-config-checkbox" value="cors" />
-                </div>
-                <p data-i18n="ecosystem.cors.body">Handle browser-facing preflight and cross-origin policy cleanly.</p>
-              </label>
-              <label class="plugin-card spotlight-card plugin-config-label">
-                <div class="plugin-card-header">
-                  <h3 data-i18n="ecosystem.options.title">Options</h3>
-                  <input type="checkbox" class="plugin-config-checkbox" value="options" checked />
-                </div>
-                <p data-i18n="ecosystem.options.body">Register static and HTTP-backed option sources without cluttering app code.</p>
-              </label>
-            </div>
-          </div>
-          
-          <div class="ecosystem-column ecosystem-code-preview spotlight-card">
-            <div class="preview-header">
-              <span class="preview-dot dot-red"></span>
-              <span class="preview-dot dot-yellow"></span>
-              <span class="preview-dot dot-green"></span>
-              <span class="preview-filename" data-i18n="ecosystem.configurator.codeTitle">Generated config (src/main.ts)</span>
-            </div>
-            <pre><code class="typescript-code" id="configurator-code-block"></code></pre>
-          </div>
-        </div>
-      </section>
-
-      <section class="section-block cli-showcase animate-on-scroll fade-in-up" id="cli">
-        <div class="section-heading">
-          <p class="eyebrow" data-i18n="cli.eyebrow">CLI</p>
-          <h2 data-i18n="cli.title">Go from empty folder to a working BFF skeleton in one command.</h2>
-        </div>
-        <div class="cli-grid">
-          <div class="cli-card cli-terminal spotlight-card">
-            <div class="cli-terminal-header">
-              <div class="cli-terminal-tabs">
-                <button type="button" class="cli-tab-btn is-active" data-cli-cmd="init" data-i18n="cli.terminal.tab.init">Init</button>
-                <button type="button" class="cli-tab-btn" data-cli-cmd="dev" data-i18n="cli.terminal.tab.dev">Dev</button>
-                <button type="button" class="cli-tab-btn" data-cli-cmd="build" data-i18n="cli.terminal.tab.build">Build</button>
+            <!-- Flow Visualizer Nodes -->
+            <div class="pipeline-nodes-flow">
+              <div class="flow-node" id="node-client">
+                <span class="flow-node-icon">📱</span>
+                <div class="flow-node-title" data-i18n="pipeline.nodeClient">Client Request</div>
+                <div class="flow-node-desc" data-i18n="pipeline.nodeClientSub">HTTP / WebSocket</div>
               </div>
-              <div class="cli-terminal-actions">
-                <button type="button" id="cli-btn-run" class="cli-btn cli-btn-run" data-i18n="cli.terminal.btnRun">Run Command</button>
-                <button type="button" id="cli-btn-copy" class="cli-btn cli-btn-copy" data-i18n="cli.terminal.btnCopy">Copy</button>
+
+              <div class="flow-connector" id="conn-1"></div>
+
+              <div class="flow-node" id="node-plugin">
+                <span class="flow-node-icon">🛡️</span>
+                <div class="flow-node-title" data-i18n="pipeline.nodePlugin">Plugin Hook</div>
+                <div class="flow-node-desc" data-i18n="pipeline.nodePluginSub">Auth & RateLimit</div>
+              </div>
+
+              <div class="flow-connector" id="conn-2"></div>
+
+              <div class="flow-node" id="node-core">
+                <span class="flow-node-icon">⚡</span>
+                <div class="flow-node-title" data-i18n="pipeline.nodeCore">Humming Kernel</div>
+                <div class="flow-node-desc" data-i18n="pipeline.nodeCoreSub">Route Matching</div>
+              </div>
+
+              <div class="flow-connector" id="conn-3"></div>
+
+              <div class="flow-node" id="node-upstream">
+                <span class="flow-node-icon">☁️</span>
+                <div class="flow-node-title" data-i18n="pipeline.nodeUpstream">Upstream Service</div>
+                <div class="flow-node-desc" data-i18n="pipeline.nodeUpstreamSub">gRPC / REST API</div>
+              </div>
+
+              <div class="flow-connector" id="conn-4"></div>
+
+              <div class="flow-node" id="node-res">
+                <span class="flow-node-icon">✨</span>
+                <div class="flow-node-title" data-i18n="pipeline.nodeRes">Response Morph</div>
+                <div class="flow-node-desc" data-i18n="pipeline.nodeResSub">Transformed Body</div>
               </div>
             </div>
-            <pre><code id="cli-terminal-body" class="cli-code"><span class="tok-comment"># Click "Run Command" to simulate</span>
-$ bunx humming init my-bff --template with-plugins</code></pre>
-          </div>
-          
-          <div class="cli-sidebar">
-            <article class="cli-card cli-layout spotlight-card">
-              <p class="mini-label" data-i18n="cli.shapeLabel">Template shape</p>
-              <pre><code data-i18n="cli.shapeCode">acme-bff/
-  src/
-    main.ts
-  package.json
-  README.md
-  .env.example</code></pre>
-            </article>
-            <article class="cli-card cli-templates spotlight-card">
-              <p class="mini-label" data-i18n="cli.templatesLabel">Templates</p>
-              <div class="template-list">
-                <div>
-                  <span class="token">basic</span>
-                  <p data-i18n="cli.basic">Smallest useful app with core built-ins only.</p>
-                </div>
-                <div>
-                  <span class="token">with-plugins</span>
-                  <p data-i18n="cli.plugins">Auth, cache, metrics, rate limit, options, and a custom plugin route.</p>
-                </div>
-                <div>
-                  <span class="token">with-forward</span>
-                  <p data-i18n="cli.forward">Forward rules plus request and response hook examples.</p>
-                </div>
-              </div>
-            </article>
+
+            <!-- Real-time Console Log Box -->
+            <div class="pipeline-terminal-output" id="pipeline-terminal-box">
+              <div class="terminal-line sys">[SYSTEM] Humming runtime listening on Bun kernel. Ready for incoming simulation.</div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section class="section-block animate-on-scroll fade-in-up" id="examples">
-        <div class="section-heading">
-          <p class="eyebrow" data-i18n="examplesHome.eyebrow">Runnable paths</p>
-          <h2 data-i18n="examplesHome.title">Jump from the product story into concrete, runnable examples.</h2>
-        </div>
-        <div class="doc-grid example-grid">
-          <a class="doc-card spotlight-card" href="./examples/basic/README.md">
-            <span class="token">basic</span>
-            <h3 data-i18n="examplesHome.basic.title">Core only</h3>
-            <p data-i18n="examplesHome.basic.body">Start with health and options only when you want the smallest useful app shape.</p>
-          </a>
-          <a class="doc-card spotlight-card" href="./examples/with-plugins/README.md">
-            <span class="token">with-plugins</span>
-            <h3 data-i18n="examplesHome.plugins.title">Operational add-ons</h3>
-            <p data-i18n="examplesHome.plugins.body">See auth, cache, metrics, rate limiting, request logging, and options in one app shell.</p>
-          </a>
-          <a class="doc-card spotlight-card" href="./examples/with-forward/README.md">
-            <span class="token">with-forward</span>
-            <h3 data-i18n="examplesHome.forward.title">Forward and hook flow</h3>
-            <p data-i18n="examplesHome.forward.body">Use request and response hooks plus transport-aware forwarding when the BFF needs upstream control.</p>
-          </a>
-          <a class="doc-card spotlight-card" href="./examples/with-async-plugin/README.md">
-            <span class="token">with-async-plugin</span>
-            <h3 data-i18n="examplesHome.async.title">Async startup</h3>
-            <p data-i18n="examplesHome.async.body">Reach for `createApp()` when plugin setup needs async work before the app is ready.</p>
-          </a>
-        </div>
-      </section>
-
-      <section class="section-block animate-on-scroll fade-in-up" id="docs">
-        <div class="section-heading">
-          <p class="eyebrow" data-i18n="docs.eyebrow">Documentation</p>
-          <h2 data-i18n="docs.title">Start from the entry that matches the job at hand.</h2>
-        </div>
-        <div class="doc-grid">
-          <a class="doc-card spotlight-card" href="./docs/index.html">
-            <h3 data-i18n="docs.portal.title">Docs portal</h3>
-            <p data-i18n="docs.portal.body">Single entry point for overview, plugin system, CLI, transport, production, and benchmark guides.</p>
-          </a>
-          <a class="doc-card spotlight-card" href="./docs/overview.md">
-            <h3 data-i18n="docs.overview.title">Overview</h3>
-            <p data-i18n="docs.overview.body">Positioning, architecture boundaries, and how the core is meant to stay small.</p>
-          </a>
-          <a class="doc-card spotlight-card" href="./docs/transport.md">
-            <h3 data-i18n="docs.transport.title">Transport</h3>
-            <p data-i18n="docs.transport.body">Keepalive, retry policy, and custom transport strategy boundaries.</p>
-          </a>
-          <a class="doc-card spotlight-card" href="./docs/cli.md">
-            <h3 data-i18n="docs.cli.title">CLI</h3>
-            <p data-i18n="docs.cli.body">Scaffold a new app quickly with the Bun-first starter templates.</p>
-          </a>
-        </div>
-      </section>
-
-      <section class="section-block panel signals-panel animate-on-scroll fade-in-up">
-        <div class="section-heading">
-          <p class="eyebrow" data-i18n="signals.eyebrow">Runtime signals</p>
-          <h2 data-i18n="signals.title">Small runtime does not have to mean opaque runtime.</h2>
-        </div>
-        <p class="section-copy signals-copy" data-i18n="signals.body">
-          `humming` is trying to stay small without forcing teams to debug blind. Startup summaries, forward timings, hook ownership, transport strategy, and plugin cleanup are meant to stay visible as the app grows.
-        </p>
-        <div class="signal-grid">
-          <article class="signal-card spotlight-card">
-            <h3 data-i18n="signals.cardOne.title">Startup summaries</h3>
-            <p data-i18n="signals.cardOne.body">See which plugins were enabled and what each one registered during setup.</p>
-          </article>
-          <article class="signal-card spotlight-card">
-            <h3 data-i18n="signals.cardTwo.title">Forward phase timing</h3>
-            <p data-i18n="signals.cardTwo.body">Split matching, hooks, upstream execution, and error handling into separate timing phases.</p>
-          </article>
-          <article class="signal-card spotlight-card">
-            <h3 data-i18n="signals.cardThree.title">Hook ownership</h3>
-            <p data-i18n="signals.cardThree.body">Track which plugins contributed the active forward hook chain for a request.</p>
-          </article>
-          <article class="signal-card spotlight-card">
-            <h3 data-i18n="signals.cardFour.title">Explicit teardown</h3>
-            <p data-i18n="signals.cardFour.body">Dispose plugin resources cleanly instead of letting timers, clients, and shared handles leak into shutdown.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="section-block panel ops-home-panel animate-on-scroll fade-in-up" id="ops-home">
-        <div class="section-heading">
-          <p class="eyebrow" data-i18n="opsHome.eyebrow">Transport and operations</p>
-          <h2 data-i18n="opsHome.title">The runtime is small, but the operational surface is still intentional.</h2>
-        </div>
-        <p class="section-copy ops-home-copy" data-i18n="opsHome.body">
-          `humming` keeps `forward` in core because upstream control is a real BFF concern. That means transport policy, rollout boundaries, regression baselines, and observability deserve first-class guidance instead of scattered notes.
-        </p>
-        <div class="doc-grid ops-home-grid">
-          <a class="doc-card spotlight-card" href="./docs/transport.md">
-            <h3 data-i18n="opsHome.transport.title">Transport</h3>
-            <p data-i18n="opsHome.transport.body">Choose between baseline fetch, keepalive-oriented fetch, retrying fetch, or a custom transport contract.</p>
-          </a>
-          <a class="doc-card spotlight-card" href="./docs/production.md">
-            <h3 data-i18n="opsHome.production.title">Production</h3>
-            <p data-i18n="opsHome.production.body">Read the deployment model, forward safety stance, metrics guidance, and cache and auth boundaries.</p>
-          </a>
-          <a class="doc-card spotlight-card" href="./docs/benchmark.md">
-            <h3 data-i18n="opsHome.benchmark.title">Benchmark</h3>
-            <p data-i18n="opsHome.benchmark.body">Compare direct upstream traffic against forwarded traffic before you change runtime behavior.</p>
-          </a>
-          <a class="doc-card spotlight-card" href="./docs/roadmap.md">
-            <h3 data-i18n="opsHome.roadmap.title">Roadmap</h3>
-            <p data-i18n="opsHome.roadmap.body">See where plugin lifecycle, observability, and broader platform maturity are heading next.</p>
-          </a>
-        </div>
-      </section>
-
-      <section class="section-block panel final-cta animate-on-scroll fade-in-up">
-        <div>
-          <p class="eyebrow" data-i18n="final.eyebrow">Start here</p>
-          <h2 data-i18n="final.title">If your team wants a thin BFF with clear boundaries, this is the point of entry.</h2>
-          <p class="section-copy" data-i18n="final.body">
-            Read the docs, inspect the examples, and scaffold a starter app. The
-            project is intentionally trying to stay small enough that you can
-            understand the runtime before the day is over.
+      <!-- Official Plugin Matrix -->
+      <section id="plugins" class="plugins-section">
+        <div class="container">
+          <span class="section-eyebrow animate-on-scroll" data-i18n="plugins.eyebrow">Ecosystem</span>
+          <h2 class="section-title animate-on-scroll" data-i18n="plugins.title">Official Plugin Matrix</h2>
+          <p class="section-subtitle animate-on-scroll" data-i18n="plugins.subtitle">
+            Modular, tree-shakeable official plugins designed for instant plug-and-play integration.
           </p>
+
+          <div class="plugins-grid">
+            <div class="plugin-item-card animate-on-scroll">
+              <div>
+                <div class="plugin-header">
+                  <span class="plugin-name">Auth Guard</span>
+                  <span class="plugin-tag">@humming/auth</span>
+                </div>
+                <p class="plugin-body">Bearer token verification, JWKS validation, and RBAC claim assertion.</p>
+              </div>
+              <div class="plugin-footer"><span>v0.1.0</span><span>Official</span></div>
+            </div>
+
+            <div class="plugin-item-card animate-on-scroll">
+              <div>
+                <div class="plugin-header">
+                  <span class="plugin-name">Memory & Redis Cache</span>
+                  <span class="plugin-tag">@humming/cache</span>
+                </div>
+                <p class="plugin-body">TTL-based response caching with stale-while-revalidate and Redis adapter.</p>
+              </div>
+              <div class="plugin-footer"><span>v0.1.0</span><span>Official</span></div>
+            </div>
+
+            <div class="plugin-item-card animate-on-scroll">
+              <div>
+                <div class="plugin-header">
+                  <span class="plugin-name">Circuit Breaker</span>
+                  <span class="plugin-tag">@humming/breaker</span>
+                </div>
+                <p class="plugin-body">Automatic fallback handling with rolling failure window and half-open probes.</p>
+              </div>
+              <div class="plugin-footer"><span>v0.1.0</span><span>Official</span></div>
+            </div>
+
+            <div class="plugin-item-card animate-on-scroll">
+              <div>
+                <div class="plugin-header">
+                  <span class="plugin-name">CORS Handler</span>
+                  <span class="plugin-tag">@humming/cors</span>
+                </div>
+                <p class="plugin-body">Granular cross-origin resource sharing rules with dynamic origin matching.</p>
+              </div>
+              <div class="plugin-footer"><span>v0.1.0</span><span>Official</span></div>
+            </div>
+
+            <div class="plugin-item-card animate-on-scroll">
+              <div>
+                <div class="plugin-header">
+                  <span class="plugin-name">Header Transform</span>
+                  <span class="plugin-tag">@humming/headers</span>
+                </div>
+                <p class="plugin-body">TraceId propagation, client IP extraction, and upstream request header injection.</p>
+              </div>
+              <div class="plugin-footer"><span>v0.1.0</span><span>Official</span></div>
+            </div>
+
+            <div class="plugin-item-card animate-on-scroll">
+              <div>
+                <div class="plugin-header">
+                  <span class="plugin-name">Prometheus Metrics</span>
+                  <span class="plugin-tag">@humming/prometheus</span>
+                </div>
+                <p class="plugin-body">Native /metrics endpoint exposing histogram percentiles, status codes, and RPS.</p>
+              </div>
+              <div class="plugin-footer"><span>v0.1.0</span><span>Official</span></div>
+            </div>
+
+            <div class="plugin-item-card animate-on-scroll">
+              <div>
+                <div class="plugin-header">
+                  <span class="plugin-name">Rate Limiter</span>
+                  <span class="plugin-tag">@humming/ratelimit</span>
+                </div>
+                <p class="plugin-body">Sliding window algorithm per IP/Token with standard 429 Retry-After headers.</p>
+              </div>
+              <div class="plugin-footer"><span>v0.1.0</span><span>Official</span></div>
+            </div>
+
+            <div class="plugin-item-card animate-on-scroll">
+              <div>
+                <div class="plugin-header">
+                  <span class="plugin-name">Response Morph</span>
+                  <span class="plugin-tag">@humming/morph</span>
+                </div>
+                <p class="plugin-body">Body transformation, field masking, and camelCase/snake_case schema adaptation.</p>
+              </div>
+              <div class="plugin-footer"><span>v0.1.0</span><span>Official</span></div>
+            </div>
+          </div>
         </div>
-        <div class="cta-stack">
-          <a class="button button-primary" href="./docs/index.html" data-i18n="final.ctaDocs">Open Docs Portal</a>
-          <a class="button button-secondary" href="./docs/cli.md" data-i18n="final.ctaCli">See CLI Guide</a>
-          <a class="button button-secondary" href="https://github.com/vinono/humming" data-i18n="final.ctaRepo">Browse Repository</a>
+      </section>
+
+      <!-- CLI & Quickstart Section -->
+      <section id="cli" class="cli-section">
+        <div class="container">
+          <div class="cli-wrapper">
+            <div class="cli-info-box animate-on-scroll">
+              <span class="section-eyebrow" data-i18n="cli.eyebrow">Developer Experience</span>
+              <h2 data-i18n="cli.title">From Zero to BFF in Seconds</h2>
+              <p data-i18n="cli.subtitle">
+                The included Bun CLI scaffolds starter templates, registers plugins, and manages production builds with zero hassle.
+              </p>
+              <ul class="cli-features-list">
+                <li><span class="cli-check-icon">✓</span> <span data-i18n="cli.f1">Interactive template generator with official plugins pre-wired</span></li>
+                <li><span class="cli-check-icon">✓</span> <span data-i18n="cli.f2">Single-command dev server with instant TypeScript hot-reload</span></li>
+                <li><span class="cli-check-icon">✓</span> <span data-i18n="cli.f3">Multi-platform Docker containerization ready out of the box</span></li>
+              </ul>
+            </div>
+
+            <!-- Terminal Window -->
+            <div class="terminal-window animate-on-scroll">
+              <div class="terminal-bar">
+                <div class="terminal-dots">
+                  <div class="terminal-dot red"></div>
+                  <div class="terminal-dot yellow"></div>
+                  <div class="terminal-dot green"></div>
+                </div>
+                <div class="terminal-title">bunx humming init</div>
+                <div style="width:40px;"></div>
+              </div>
+
+              <div class="terminal-tabs">
+                <button type="button" class="term-tab-btn is-active" data-tab="init">1. Scaffold</button>
+                <button type="button" class="term-tab-btn" data-tab="dev">2. Dev Engine</button>
+                <button type="button" class="term-tab-btn" data-tab="docker">3. Docker</button>
+              </div>
+
+              <div class="terminal-body" id="terminal-code-body">
+<span class="comment"># 1. Initialize a new BFF project with official plugins</span>
+<span class="cmd">bunx humming init</span> my-bff <span class="flag">--template with-plugins</span>
+
+<span class="comment"># 2. Enter workspace & start Bun dev engine</span>
+<span class="cmd">cd</span> my-bff
+<span class="cmd">bun install</span>
+<span class="cmd">bun run dev</span>
+
+<span class="comment"># 3. Test built-in health & options routes</span>
+<span class="cmd">curl</span> http://localhost:8788/health
+<span class="cmd">curl</span> http://localhost:8788/api/options?keys=teams
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </main>
 
-    <footer class="footer">
-      <p data-i18n="footer.tagline">humming is a plugin-first lightweight BFF core for Bun.</p>
-      <div class="footer-links">
-        <a href="./docs/index.html" data-i18n="footer.docs">Docs</a>
-        <a href="./README.md" data-i18n="footer.readme">README</a>
-        <a href="https://github.com/vinono/humming" data-i18n="footer.github">GitHub</a>
+    <!-- Ultra-Minimalist Endel-Style Footer -->
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-top">
+          <div class="footer-brand">
+            <img src="./assets/brand/humming-mark.svg" alt="humming" width="28" height="28" />
+            <span>humming</span>
+          </div>
+
+          <div class="footer-links">
+            <a href="./docs/index.html" data-i18n="footer.docs">Documentation</a>
+            <a href="https://github.com/vinono/humming" target="_blank" rel="noopener noreferrer" data-i18n="footer.github">GitHub</a>
+            <a href="https://github.com/vinono/humming/releases" target="_blank" rel="noopener noreferrer" data-i18n="footer.releases">Releases</a>
+            <a href="./LICENSE-MIT" data-i18n="footer.license">MIT / Apache-2.0</a>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <div data-i18n="footer.desc">Humming is an open-source lightweight BFF core for Bun.</div>
+          <div data-i18n="footer.allRights">Crafted for high-performance frontend teams.</div>
+        </div>
       </div>
     </footer>
   </body>

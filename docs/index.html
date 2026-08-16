@@ -3,234 +3,321 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title data-i18n="meta.title">humming Docs</title>
+    <title data-i18n="meta.title">humming Docs | Documentation Portal</title>
     <meta
       name="description"
       content="Documentation entry for humming: overview, plugin system, CLI, transport, production, benchmark, and plugin authoring guides."
       data-i18n="meta.description"
       data-i18n-attr="content"
     />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="../site/styles.css" />
     <script defer src="../site/i18n.js"></script>
+    <script defer src="../site/soundscape.js"></script>
     <script defer src="../site/effects.js"></script>
   </head>
   <body class="page-shell docs-shell" data-page="docs">
+    <!-- Ambient Backdrop -->
     <div class="site-backdrop" aria-hidden="true">
-      <div class="glow glow-cyan"></div>
-      <div class="glow glow-amber"></div>
-      <div class="grid-noise"></div>
+      <canvas id="soundscape-canvas"></canvas>
+      <div class="ambient-aura aura-1"></div>
+      <div class="ambient-aura aura-2"></div>
+      <div class="ambient-aura aura-3"></div>
+      <div class="subtle-noise"></div>
     </div>
 
-    <header class="topbar">
-      <a
-        class="brand-lockup"
-        href="../index.html"
-        aria-label="humming home"
-        data-i18n="brand.homeAria"
-        data-i18n-attr="aria-label"
-      >
-        <img
-          src="../assets/brand/humming-mark.svg"
-          alt=""
-          width="40"
-          height="40"
-        />
-        <span data-i18n="brand.docs">humming docs</span>
-      </a>
-      <div class="topbar-controls">
-        <nav class="topnav">
-          <a href="../index.html" data-i18n="nav.home">Home</a>
-          <a href="#tracks" data-i18n="nav.tracks">Tracks</a>
-          <a href="#examples" data-i18n="nav.examples">Examples</a>
-          <a href="#ops" data-i18n="nav.ops">Ops</a>
-        </nav>
-        <div
-          class="lang-switch"
-          role="group"
-          aria-label="Language switch"
-          data-i18n="lang.switchLabel"
+    <!-- Floating Top Navigation -->
+    <div class="topbar-wrapper">
+      <header class="topbar">
+        <a
+          class="brand-lockup"
+          href="../index.html"
+          aria-label="humming home"
+          data-i18n="brand.homeAria"
           data-i18n-attr="aria-label"
         >
-          <button type="button" class="lang-button" data-lang-switch="en">EN</button>
-          <button type="button" class="lang-button" data-lang-switch="zh">中文</button>
-        </div>
-      </div>
-    </header>
+          <img
+            class="brand-logo-img"
+            src="../assets/brand/humming-mark.svg"
+            alt="humming"
+            width="32"
+            height="32"
+          />
+          <span data-i18n="brand.docs">humming docs</span>
+        </a>
 
-    <main>
-      <section class="hero panel docs-hero animate-on-scroll fade-in-up">
-        <div class="hero-copy">
-          <p class="eyebrow" data-i18n="hero.eyebrow">Documentation entry</p>
-          <h1 data-i18n="hero.title">Find the shortest path from evaluation to implementation.</h1>
-          <p class="lede" data-i18n="hero.lede">
-            This page is the entry point for the current `humming` docs set.
-            The detailed guides still live in Markdown so they stay close to the
-            codebase and version history.
-          </p>
+        <nav class="topnav" aria-label="Main Navigation">
+          <a class="nav-link" href="../index.html" data-i18n="nav.home">Home</a>
+          <a class="nav-link" href="#tracks" data-i18n="nav.tracks">Tracks</a>
+          <a class="nav-link" href="#core" data-i18n="nav.core">Core</a>
+          <a class="nav-link" href="#examples" data-i18n="nav.examples">Examples</a>
+          <a class="nav-link" href="#ops" data-i18n="nav.ops">Ops</a>
+        </nav>
+
+        <div class="topbar-actions">
+          <!-- Language Switcher -->
+          <div
+            class="lang-switch"
+            role="group"
+            aria-label="Language switch"
+            data-i18n="lang.switchLabel"
+            data-i18n-attr="aria-label"
+          >
+            <button type="button" class="lang-btn active" data-lang-switch="en">EN</button>
+            <button type="button" class="lang-btn" data-lang-switch="zh">中文</button>
+          </div>
+
+          <a class="btn-topbar-cta" href="../index.html">← Landing Page</a>
         </div>
-        <div class="hero-card compact-card spotlight-card">
-          <p class="mini-label" data-i18n="hero.pathsLabel">Recommended reading paths</p>
-          <ul class="route-list">
-            <li data-i18n="hero.pathOne" data-i18n-mode="html"><strong>Evaluating humming:</strong> overview → README → plugin system</li>
-            <li data-i18n="hero.pathTwo" data-i18n-mode="html"><strong>Starting a new app:</strong> CLI → examples → production</li>
-            <li data-i18n="hero.pathThree" data-i18n-mode="html"><strong>Tuning forward:</strong> transport → benchmark → production</li>
-            <li data-i18n="hero.pathFour" data-i18n-mode="html"><strong>Building extensions:</strong> plugin system → plugin guide</li>
-          </ul>
+      </header>
+    </div>
+
+    <main class="container">
+      <!-- Docs Hero Section -->
+      <section class="docs-hero-panel animate-on-scroll">
+        <div class="docs-hero-grid">
+          <div class="docs-hero-copy">
+            <span class="section-eyebrow" data-i18n="hero.eyebrow">Documentation entry</span>
+            <h1 class="docs-hero-title" data-i18n="hero.title">Find the shortest path from evaluation to implementation.</h1>
+            <p class="docs-hero-lede" data-i18n="hero.lede">
+              This page is the entry point for the current `humming` docs set.
+              The detailed guides still live in Markdown so they stay close to the
+              codebase and version history.
+            </p>
+          </div>
+
+          <div class="docs-hero-card">
+            <p class="docs-card-label" data-i18n="hero.pathsLabel">Recommended reading paths</p>
+            <ul class="docs-route-list">
+              <li data-i18n="hero.pathOne" data-i18n-mode="html"><strong>Evaluating humming:</strong> overview → README → plugin system</li>
+              <li data-i18n="hero.pathTwo" data-i18n-mode="html"><strong>Starting a new app:</strong> CLI → examples → production</li>
+              <li data-i18n="hero.pathThree" data-i18n-mode="html"><strong>Tuning forward:</strong> transport → benchmark → production</li>
+              <li data-i18n="hero.pathFour" data-i18n-mode="html"><strong>Building extensions:</strong> plugin system → plugin guide</li>
+            </ul>
+          </div>
         </div>
       </section>
 
-      <section class="section-block animate-on-scroll fade-in-up" id="tracks">
-        <div class="section-heading">
-          <p class="eyebrow" data-i18n="tracks.eyebrow">Reading tracks</p>
-          <h2 data-i18n="tracks.title">Pick the path that matches the job in front of you.</h2>
+      <!-- Reading Tracks -->
+      <section class="docs-section-block" id="tracks">
+        <div class="docs-section-heading animate-on-scroll">
+          <span class="section-eyebrow" data-i18n="tracks.eyebrow">Reading tracks</span>
+          <h2 class="section-title" data-i18n="tracks.title">Pick the path that matches the job in front of you.</h2>
         </div>
-        <div class="doc-grid track-grid">
-          <article class="doc-card track-card spotlight-card">
-            <span class="token" data-i18n="tracks.evaluate.token">evaluate</span>
-            <h3 data-i18n="tracks.evaluate.title">Assess fit first</h3>
-            <p data-i18n="tracks.evaluate.body">Start with positioning and boundaries before reading implementation details.</p>
-            <div class="example-links">
-              <a href="./overview.md">overview</a>
-              <a href="../README.md">README</a>
-              <a href="./plugin-system.md">plugin-system</a>
+
+        <div class="docs-cards-grid">
+          <article class="doc-card animate-on-scroll">
+            <div>
+              <span class="doc-token" data-i18n="tracks.evaluate.token">evaluate</span>
+              <h3 class="doc-card-title" data-i18n="tracks.evaluate.title">Assess fit first</h3>
+              <p class="doc-card-body" data-i18n="tracks.evaluate.body">Start with positioning and boundaries before reading implementation details.</p>
+            </div>
+            <div class="doc-example-links">
+              <a href="./overview.md">overview ↗</a>
+              <a href="../README.md">README ↗</a>
+              <a href="./plugin-system.md">plugin-system ↗</a>
             </div>
           </article>
-          <article class="doc-card track-card spotlight-card">
-            <span class="token" data-i18n="tracks.start.token">start</span>
-            <h3 data-i18n="tracks.start.title">Launch a new app</h3>
-            <p data-i18n="tracks.start.body">Use the CLI, inspect examples, then move into production guidance once the shape is clear.</p>
-            <div class="example-links">
-              <a href="./cli.md">cli</a>
-              <a href="../examples/with-plugins/README.md">examples</a>
-              <a href="./production.md">production</a>
+
+          <article class="doc-card animate-on-scroll">
+            <div>
+              <span class="doc-token" data-i18n="tracks.start.token">start</span>
+              <h3 class="doc-card-title" data-i18n="tracks.start.title">Launch a new app</h3>
+              <p class="doc-card-body" data-i18n="tracks.start.body">Use the CLI, inspect examples, then move into production guidance once the shape is clear.</p>
+            </div>
+            <div class="doc-example-links">
+              <a href="./cli.md">cli ↗</a>
+              <a href="../examples/with-plugins/README.md">examples ↗</a>
+              <a href="./production.md">production ↗</a>
             </div>
           </article>
-          <article class="doc-card track-card spotlight-card">
-            <span class="token" data-i18n="tracks.extend.token">extend</span>
-            <h3 data-i18n="tracks.extend.title">Build plugins and hooks</h3>
-            <p data-i18n="tracks.extend.body">Understand the plugin model first, then drop to the authoring guide and forward hooks.</p>
-            <div class="example-links">
-              <a href="./plugin-system.md">plugin-system</a>
-              <a href="../PLUGIN_GUIDE.md">plugin-guide</a>
-              <a href="./transport.md">transport</a>
+
+          <article class="doc-card animate-on-scroll">
+            <div>
+              <span class="doc-token" data-i18n="tracks.extend.token">extend</span>
+              <h3 class="doc-card-title" data-i18n="tracks.extend.title">Build plugins and hooks</h3>
+              <p class="doc-card-body" data-i18n="tracks.extend.body">Understand the plugin model first, then drop to the authoring guide and forward hooks.</p>
+            </div>
+            <div class="doc-example-links">
+              <a href="./plugin-system.md">plugin-system ↗</a>
+              <a href="../PLUGIN_GUIDE.md">plugin-guide ↗</a>
+              <a href="./transport.md">transport ↗</a>
             </div>
           </article>
-          <article class="doc-card track-card spotlight-card">
-            <span class="token" data-i18n="tracks.operate.token">operate</span>
-            <h3 data-i18n="tracks.operate.title">Prepare for rollout</h3>
-            <p data-i18n="tracks.operate.body">Focus on transport policy, production guidance, local benchmarks, and the current roadmap.</p>
-            <div class="example-links">
-              <a href="./transport.md">transport</a>
-              <a href="./benchmark.md">benchmark</a>
-              <a href="./roadmap.md">roadmap</a>
+
+          <article class="doc-card animate-on-scroll">
+            <div>
+              <span class="doc-token" data-i18n="tracks.operate.token">operate</span>
+              <h3 class="doc-card-title" data-i18n="tracks.operate.title">Prepare for rollout</h3>
+              <p class="doc-card-body" data-i18n="tracks.operate.body">Focus on transport policy, production guidance, local benchmarks, and the current roadmap.</p>
+            </div>
+            <div class="doc-example-links">
+              <a href="./transport.md">transport ↗</a>
+              <a href="./benchmark.md">benchmark ↗</a>
+              <a href="./roadmap.md">roadmap ↗</a>
             </div>
           </article>
         </div>
       </section>
 
-      <section class="section-block animate-on-scroll fade-in-up">
-        <div class="section-heading">
-          <p class="eyebrow" data-i18n="core.eyebrow">Core guides</p>
-          <h2 data-i18n="core.title">Read the architecture and runtime boundaries first.</h2>
+      <!-- Core Guides -->
+      <section class="docs-section-block" id="core">
+        <div class="docs-section-heading animate-on-scroll">
+          <span class="section-eyebrow" data-i18n="core.eyebrow">Core guides</span>
+          <h2 class="section-title" data-i18n="core.title">Read the architecture and runtime boundaries first.</h2>
         </div>
-        <div class="doc-grid">
-          <a class="doc-card spotlight-card" href="./overview.md">
-            <h3 data-i18n="core.overview.title">Overview</h3>
-            <p data-i18n="core.overview.body">Positioning, architecture, core boundaries, and when `humming` is the right fit.</p>
+        <div class="docs-cards-grid">
+          <a class="doc-card animate-on-scroll" href="./overview.md">
+            <div>
+              <h3 class="doc-card-title" data-i18n="core.overview.title">Overview</h3>
+              <p class="doc-card-body" data-i18n="core.overview.body">Positioning, architecture, core boundaries, and when `humming` is the right fit.</p>
+            </div>
+            <div class="doc-link-arrow">Read Guide →</div>
           </a>
-          <a class="doc-card spotlight-card" href="./plugin-system.md">
-            <h3 data-i18n="core.plugin.title">Plugin system</h3>
-            <p data-i18n="core.plugin.body">Extension model, governance direction, execution order, and growth strategy.</p>
+          <a class="doc-card animate-on-scroll" href="./plugin-system.md">
+            <div>
+              <h3 class="doc-card-title" data-i18n="core.plugin.title">Plugin system</h3>
+              <p class="doc-card-body" data-i18n="core.plugin.body">Extension model, governance direction, execution order, and growth strategy.</p>
+            </div>
+            <div class="doc-link-arrow">Read Guide →</div>
           </a>
-          <a class="doc-card spotlight-card" href="./transport.md">
-            <h3 data-i18n="core.transport.title">Transport</h3>
-            <p data-i18n="core.transport.body">Forward transport strategies, keepalive, retry policy, and custom transport hooks.</p>
+          <a class="doc-card animate-on-scroll" href="./transport.md">
+            <div>
+              <h3 class="doc-card-title" data-i18n="core.transport.title">Transport</h3>
+              <p class="doc-card-body" data-i18n="core.transport.body">Forward transport strategies, keepalive, retry policy, and custom transport hooks.</p>
+            </div>
+            <div class="doc-link-arrow">Read Guide →</div>
           </a>
-          <a class="doc-card spotlight-card" href="./production.md">
-            <h3 data-i18n="core.production.title">Production</h3>
-            <p data-i18n="core.production.body">Runtime setup, operational concerns, and how to keep the service predictable.</p>
-          </a>
-        </div>
-      </section>
-
-      <section class="section-block animate-on-scroll fade-in-up">
-        <div class="section-heading">
-          <p class="eyebrow" data-i18n="tooling.eyebrow">Tooling guides</p>
-          <h2 data-i18n="tooling.title">Use the CLI and benchmark docs when you want to move quickly.</h2>
-        </div>
-        <div class="doc-grid">
-          <a class="doc-card spotlight-card" href="./cli.md">
-            <h3 data-i18n="tooling.cli.title">CLI</h3>
-            <p data-i18n="tooling.cli.body">Scaffold apps from templates and standardize local project bootstrapping.</p>
-          </a>
-          <a class="doc-card spotlight-card" href="./benchmark.md">
-            <h3 data-i18n="tooling.benchmark.title">Benchmark</h3>
-            <p data-i18n="tooling.benchmark.body">Measure the forward baseline and compare direct upstream calls with proxied traffic.</p>
-          </a>
-          <a class="doc-card spotlight-card" href="../PLUGIN_GUIDE.md">
-            <h3 data-i18n="tooling.guide.title">Plugin guide</h3>
-            <p data-i18n="tooling.guide.body">Code-level authoring details, examples, and patterns for building custom plugins.</p>
-          </a>
-          <a class="doc-card spotlight-card" href="../README.md">
-            <h3 data-i18n="tooling.readme.title">Repository README</h3>
-            <p data-i18n="tooling.readme.body">Main project landing page with quick start, official plugins, and examples.</p>
+          <a class="doc-card animate-on-scroll" href="./production.md">
+            <div>
+              <h3 class="doc-card-title" data-i18n="core.production.title">Production</h3>
+              <p class="doc-card-body" data-i18n="core.production.body">Runtime setup, operational concerns, and how to keep the service predictable.</p>
+            </div>
+            <div class="doc-link-arrow">Read Guide →</div>
           </a>
         </div>
       </section>
 
-      <section class="section-block panel split-panel animate-on-scroll fade-in-up" id="examples">
+      <!-- Tooling Guides -->
+      <section class="docs-section-block">
+        <div class="docs-section-heading animate-on-scroll">
+          <span class="section-eyebrow" data-i18n="tooling.eyebrow">Tooling guides</span>
+          <h2 class="section-title" data-i18n="tooling.title">Use the CLI and benchmark docs when you want to move quickly.</h2>
+        </div>
+        <div class="docs-cards-grid">
+          <a class="doc-card animate-on-scroll" href="./cli.md">
+            <div>
+              <h3 class="doc-card-title" data-i18n="tooling.cli.title">CLI</h3>
+              <p class="doc-card-body" data-i18n="tooling.cli.body">Scaffold apps from templates and standardize local project bootstrapping.</p>
+            </div>
+            <div class="doc-link-arrow">Read Guide →</div>
+          </a>
+          <a class="doc-card animate-on-scroll" href="./benchmark.md">
+            <div>
+              <h3 class="doc-card-title" data-i18n="tooling.benchmark.title">Benchmark</h3>
+              <p class="doc-card-body" data-i18n="tooling.benchmark.body">Measure the forward baseline and compare direct upstream calls with proxied traffic.</p>
+            </div>
+            <div class="doc-link-arrow">Read Guide →</div>
+          </a>
+          <a class="doc-card animate-on-scroll" href="../PLUGIN_GUIDE.md">
+            <div>
+              <h3 class="doc-card-title" data-i18n="tooling.guide.title">Plugin guide</h3>
+              <p class="doc-card-body" data-i18n="tooling.guide.body">Code-level authoring details, examples, and patterns for building custom plugins.</p>
+            </div>
+            <div class="doc-link-arrow">Read Guide →</div>
+          </a>
+          <a class="doc-card animate-on-scroll" href="../README.md">
+            <div>
+              <h3 class="doc-card-title" data-i18n="tooling.readme.title">Repository README</h3>
+              <p class="doc-card-body" data-i18n="tooling.readme.body">Main project landing page with quick start, official plugins, and examples.</p>
+            </div>
+            <div class="doc-link-arrow">Read Guide →</div>
+          </a>
+        </div>
+      </section>
+
+      <!-- Examples Section Block -->
+      <section class="docs-split-panel animate-on-scroll" id="examples">
         <div>
-          <p class="eyebrow" data-i18n="examples.eyebrow">Examples</p>
-          <h2 data-i18n="examples.title">Map the docs to runnable templates.</h2>
-          <p class="section-copy" data-i18n="examples.body">
+          <span class="section-eyebrow" data-i18n="examples.eyebrow">Examples</span>
+          <h2 class="section-title" style="font-size:1.8rem;" data-i18n="examples.title">Map the docs to runnable templates.</h2>
+          <p style="color:var(--text-muted); margin-top:12px; line-height:1.6;" data-i18n="examples.body">
             The examples folder is the fastest way to move from concepts to a
             running app. Use the matching example after each guide instead of
             trying to absorb everything at once.
           </p>
         </div>
-        <div class="example-links">
-          <a href="../examples/basic/README.md">basic</a>
-          <a href="../examples/with-plugins/README.md">with-plugins</a>
-          <a href="../examples/with-forward/README.md">with-forward</a>
-          <a href="../examples/with-async-plugin/README.md">with-async-plugin</a>
+        <div class="doc-example-links" style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+          <a href="../examples/basic/README.md">basic ↗</a>
+          <a href="../examples/with-plugins/README.md">with-plugins ↗</a>
+          <a href="../examples/with-forward/README.md">with-forward ↗</a>
+          <a href="../examples/with-async-plugin/README.md">with-async-plugin ↗</a>
         </div>
       </section>
 
-      <section class="section-block panel split-panel animate-on-scroll fade-in-up" id="ops">
+      <!-- Operational Depth Section Block -->
+      <section class="docs-split-panel animate-on-scroll" id="ops">
         <div>
-          <p class="eyebrow" data-i18n="ops.eyebrow">Operational depth</p>
-          <h2 data-i18n="ops.title">When the question is operational, follow the transport-to-rollout path.</h2>
-          <p class="section-copy" data-i18n="ops.body">
+          <span class="section-eyebrow" data-i18n="ops.eyebrow">Operational depth</span>
+          <h2 class="section-title" style="font-size:1.8rem;" data-i18n="ops.title">When the question is operational, follow the transport-to-rollout path.</h2>
+          <p style="color:var(--text-muted); margin-top:12px; line-height:1.6;" data-i18n="ops.body">
             `humming` is small, but the forward path, startup summaries, plugin lifecycle, and production boundaries still deserve deliberate reading. This set is the shortest way to get there.
           </p>
         </div>
-        <div class="doc-grid ops-grid">
-          <a class="doc-card spotlight-card" href="./transport.md">
-            <h3 data-i18n="ops.transport.title">Transport policy</h3>
-            <p data-i18n="ops.transport.body">Understand retry, keepalive, custom transport boundaries, and route-level selection.</p>
+        <div class="docs-cards-grid" style="grid-template-columns:1fr 1fr;">
+          <a class="doc-card" href="./transport.md">
+            <div>
+              <h3 class="doc-card-title" data-i18n="ops.transport.title">Transport policy</h3>
+              <p class="doc-card-body" data-i18n="ops.transport.body">Understand retry, keepalive, custom transport boundaries, and route-level selection.</p>
+            </div>
           </a>
-          <a class="doc-card spotlight-card" href="./production.md">
-            <h3 data-i18n="ops.production.title">Production guide</h3>
-            <p data-i18n="ops.production.body">Review deployment shape, auth, cache, logging, metrics, and forward safety expectations.</p>
+          <a class="doc-card" href="./production.md">
+            <div>
+              <h3 class="doc-card-title" data-i18n="ops.production.title">Production guide</h3>
+              <p class="doc-card-body" data-i18n="ops.production.body">Review deployment shape, auth, cache, logging, metrics, and forward safety expectations.</p>
+            </div>
           </a>
-          <a class="doc-card spotlight-card" href="./benchmark.md">
-            <h3 data-i18n="ops.benchmark.title">Benchmark workflow</h3>
-            <p data-i18n="ops.benchmark.body">Use the local forward benchmark as a regression signal before changing transport behavior.</p>
+          <a class="doc-card" href="./benchmark.md">
+            <div>
+              <h3 class="doc-card-title" data-i18n="ops.benchmark.title">Benchmark workflow</h3>
+              <p class="doc-card-body" data-i18n="ops.benchmark.body">Use the local forward benchmark as a regression signal before changing transport behavior.</p>
+            </div>
           </a>
-          <a class="doc-card spotlight-card" href="./roadmap.md">
-            <h3 data-i18n="ops.roadmap.title">Roadmap</h3>
-            <p data-i18n="ops.roadmap.body">See which maturity gaps are being closed now and which areas intentionally wait.</p>
+          <a class="doc-card" href="./roadmap.md">
+            <div>
+              <h3 class="doc-card-title" data-i18n="ops.roadmap.title">Roadmap</h3>
+              <p class="doc-card-body" data-i18n="ops.roadmap.body">See which maturity gaps are being closed now and which areas intentionally wait.</p>
+            </div>
           </a>
         </div>
       </section>
     </main>
 
-    <footer class="footer">
-      <p data-i18n="footer.tagline">Detailed docs live in versioned Markdown files inside this repository.</p>
-      <div class="footer-links">
-        <a href="../index.html" data-i18n="footer.home">Home</a>
-        <a href="../README.md" data-i18n="footer.readme">README</a>
-        <a href="https://github.com/vinono/humming/tree/main/docs" data-i18n="footer.docsFolder">Docs Folder</a>
+    <!-- Footer -->
+    <footer class="site-footer" style="margin-top:80px;">
+      <div class="container">
+        <div class="footer-top">
+          <div class="footer-brand">
+            <img src="../assets/brand/humming-mark.svg" alt="humming" width="28" height="28" />
+            <span>humming docs</span>
+          </div>
+
+          <div class="footer-links">
+            <a href="../index.html" data-i18n="footer.home">Home</a>
+            <a href="../README.md" data-i18n="footer.readme">README</a>
+            <a href="https://github.com/vinono/humming/tree/main/docs" data-i18n="footer.docsFolder">Docs Folder</a>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <div data-i18n="footer.tagline">Detailed docs live in versioned Markdown files inside this repository.</div>
+          <div data-i18n="footer.allRights">Crafted for high-performance frontend teams.</div>
+        </div>
       </div>
     </footer>
   </body>
