@@ -6,7 +6,7 @@
     <title data-i18n="meta.title">humming | Plugin-first lightweight BFF core for Bun</title>
     <meta
       name="description"
-      content="humming is a plugin-first lightweight BFF core for Bun. Experience high-throughput, low-latency BFF routing inspired by ambient soundscapes."
+      content="humming is a plugin-first lightweight BFF core for Bun. Experience high-throughput, sub-millisecond low latency proxying and zero-copy streams."
       data-i18n="meta.description"
       data-i18n-attr="content"
     />
@@ -22,7 +22,7 @@
     <script defer src="./site/effects.js"></script>
   </head>
   <body class="page-shell" data-page="home">
-    <!-- Ambient Soundscape Canvas Backdrop -->
+    <!-- Ambient Backdrop -->
     <div class="site-backdrop" aria-hidden="true">
       <canvas id="soundscape-canvas"></canvas>
       <div class="ambient-aura aura-1"></div>
@@ -52,7 +52,7 @@
         </a>
 
         <nav class="topnav" aria-label="Main Navigation">
-          <a class="nav-link" href="#modes" data-i18n="nav.modes">Modes</a>
+          <a class="nav-link" href="#modes" data-i18n="nav.modes">Architecture</a>
           <a class="nav-link" href="#benchmarks" data-i18n="nav.benchmarks">Benchmarks</a>
           <a class="nav-link" href="#pipeline" data-i18n="nav.pipeline">Pipeline</a>
           <a class="nav-link" href="#plugins" data-i18n="nav.plugins">Plugins</a>
@@ -73,7 +73,12 @@
             <button type="button" class="lang-btn" data-lang-switch="zh">中文</button>
           </div>
 
-          <a class="btn-topbar-cta" href="./docs/index.html" data-i18n="hero.ctaDocs">Docs ↗</a>
+          <a class="btn-topbar-cta" href="https://github.com/vinono/humming" target="_blank" rel="noopener noreferrer" aria-label="GitHub Repository">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right:2px;">
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+            </svg>
+            <span>GitHub</span>
+          </a>
         </div>
       </header>
     </div>
@@ -88,7 +93,7 @@
           </div>
 
           <h1 class="hero-title animate-on-scroll">
-            <span class="gradient-text" data-i18n="hero.title">The Sound of Fast, Thin Backends on Bun.</span>
+            <span class="gradient-text" data-i18n="hero.title">Build a small BFF on Bun without dragging in a full framework.</span>
           </h1>
 
           <p class="hero-description animate-on-scroll" data-i18n="hero.lede">
@@ -118,104 +123,158 @@
             </a>
           </div>
 
-          <!-- Endel-Style Soundscape Hero Visualizer Player -->
-          <div class="hero-player-wrap animate-on-scroll">
-            <div class="hero-player-header">
-              <div class="player-mode-indicators">
-                <button type="button" class="mode-tag is-active" data-sound-mode="fast-path" data-i18n="player.modeFast">Fast-Path</button>
-                <button type="button" class="mode-tag" data-sound-mode="plugin-mesh" data-i18n="player.modeMesh">Plugin Mesh</button>
-                <button type="button" class="mode-tag" data-sound-mode="forward" data-i18n="player.modeForward">Forward</button>
-                <button type="button" class="mode-tag" data-sound-mode="minimal" data-i18n="player.modeMinimal">Minimal</button>
+          <!-- Interactive Code Playground (方案 A: 5行代码与实时测试控制台) -->
+          <div class="code-playground-wrap animate-on-scroll">
+            <div class="playground-topbar">
+              <div class="playground-dots">
+                <span class="dot dot-red"></span>
+                <span class="dot dot-yellow"></span>
+                <span class="dot dot-green"></span>
               </div>
 
-              <div class="player-telemetry">
-                <div class="telemetry-item">
-                  <span data-i18n="player.telemetryRps">Throughput</span>:
-                  <strong class="val-cyan" id="telemetry-rps-val">182,400 req/s</strong>
-                </div>
-                <div class="telemetry-item">
-                  <span data-i18n="player.telemetryLatency">Proxy Latency</span>:
-                  <strong class="val-emerald">&lt; 0.45 ms</strong>
-                </div>
-                <div class="telemetry-item">
-                  <span data-i18n="player.telemetryMem">Memory</span>:
-                  <strong>16.4 MB</strong>
-                </div>
+              <div class="playground-tabs">
+                <button type="button" class="pg-tab is-active" data-pg-tab="fast">
+                  <span class="tab-badge">01</span> Fast-Path BFF
+                </button>
+                <button type="button" class="pg-tab" data-pg-tab="plugins">
+                  <span class="tab-badge">02</span> Auth & Cache Mesh
+                </button>
+                <button type="button" class="pg-tab" data-pg-tab="forward">
+                  <span class="tab-badge">03</span> Streaming Forward
+                </button>
               </div>
-            </div>
 
-            <div class="hero-wave-canvas-container">
-              <canvas id="hero-wave-canvas"></canvas>
-              <div class="player-center-meta">
-                <div class="meta-title" data-i18n="player.metaTitle">humming kernel monitor</div>
-                <div class="meta-sub" data-i18n="player.metaSub">Zero-Copy Stream Pipeline · Bun Native Runtime</div>
-              </div>
-            </div>
-
-            <div class="hero-player-footer">
-              <div class="player-footer-left">
+              <div class="playground-telemetry-badge">
                 <span class="status-dot"></span>
-                <span class="player-waveform-desc" data-i18n="player.canvasDesc">Live event-loop traffic monitor responding to Bun kernel throughput dynamics.</span>
+                <span>Bun Native · &lt; 0.45ms</span>
               </div>
-              <div style="font-family:'JetBrains Mono', monospace; font-size:0.78rem; color:var(--text-subtle);">
-                BUFFER: 0ms · GC: ULTRA-LOW · ZERO-COPY
+            </div>
+
+            <div class="playground-content-grid">
+              <!-- Left: Code Editor -->
+              <div class="playground-editor-pane">
+                <div class="editor-file-header">
+                  <span class="file-icon">TS</span>
+                  <span class="file-name" id="pg-file-name">src/index.ts</span>
+                </div>
+                <pre class="editor-code-block font-mono" id="pg-code-display"><code><span class="token-keyword">import</span> { createApp } <span class="token-keyword">from</span> <span class="token-string">'humming'</span>;
+
+<span class="token-keyword">const</span> app = <span class="token-func">createApp</span>({
+  port: <span class="token-number">8788</span>,
+  routes: {
+    <span class="token-string">'/health'</span>: () => ({ status: <span class="token-string">'ok'</span>, uptime: process.<span class="token-func">uptime</span>() }),
+    <span class="token-string">'/api/options'</span>: { teams: [<span class="token-string">'Core'</span>, <span class="token-string">'Platform'</span>, <span class="token-string">'UI'</span>] }
+  }
+});
+
+app.<span class="token-func">listen</span>();</code></pre>
+              </div>
+
+              <!-- Right: Live Interactive Response Console -->
+              <div class="playground-response-pane">
+                <div class="response-header">
+                  <div class="req-url-box font-mono">
+                    <span class="http-method">GET</span>
+                    <span class="http-path" id="pg-req-path">http://localhost:8788/health</span>
+                  </div>
+                  <button type="button" class="btn-pg-run" id="btn-pg-run">
+                    <span>▶</span>
+                    <span>Send</span>
+                  </button>
+                </div>
+
+                <div class="response-status-bar">
+                  <span class="status-tag status-200">200 OK</span>
+                  <span class="response-stat" id="pg-latency-stat">0.38 ms</span>
+                  <span class="response-stat">182k req/s</span>
+                </div>
+
+                <div class="response-body-viewer font-mono" id="pg-response-json">
+<span class="json-brace">{</span>
+  <span class="json-key">"status"</span>: <span class="json-str">"healthy"</span>,
+  <span class="json-key">"runtime"</span>: <span class="json-str">"bun-1.3.11"</span>,
+  <span class="json-key">"uptime"</span>: <span class="json-num">14.28</span>,
+  <span class="json-key">"proxy_overhead"</span>: <span class="json-str">"&lt; 0.4ms"</span>,
+  <span class="json-key">"zero_copy"</span>: <span class="json-bool">true</span>
+<span class="json-brace">}</span></div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Ecosystem & Runtime Partners -->
+      <!-- Ecosystem & Runtime Partners (使用官方准确矢量图标) -->
       <section class="ecosystem-section animate-on-scroll">
         <div class="container">
-          <div class="ecosystem-label" data-i18n="eco.label">Built with and powered by the modern runtime ecosystem</div>
+          <div class="ecosystem-label" data-i18n="eco.label">深度协同现代高性能运行时与云原生生态</div>
           <div class="ecosystem-grid">
+            <!-- 1. Bun Official Logo -->
             <div class="eco-item">
-              <svg class="eco-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9v-2h2v2zm0-4H9V7h2v5z"/></svg>
+              <svg class="eco-icon" viewBox="0 0 32 32" fill="currentColor">
+                <path d="M16.03 5.42c-4.48 0-8.2 2.65-9.33 6.36-.88 2.87-.22 5.92 1.83 8.35 1.86 2.21 4.54 3.47 7.45 3.47 2.95 0 5.66-1.29 7.54-3.53 2.05-2.45 2.67-5.51 1.76-8.35-1.15-3.66-4.83-6.3-9.25-6.3zm-3.66 9.87c.72 0 1.31.59 1.31 1.31s-.59 1.31-1.31 1.31-1.31-.59-1.31-1.31.59-1.31 1.31-1.31zm7.32 0c.72 0 1.31.59 1.31 1.31s-.59 1.31-1.31 1.31-1.31-.59-1.31-1.31.59-1.31 1.31-1.31zm-3.66 4.39c-1.8 0-2.85-.92-2.93-1-.28-.27-.29-.72-.02-1 .27-.28.72-.29 1-.02.04.04.75.64 1.95.64 1.2 0 1.91-.6 1.95-.64.28-.27.73-.26 1 .02.27.28.26.73-.02 1-.08.08-1.13 1-2.93 1z"/>
+              </svg>
               <span>Bun v1.3+</span>
             </div>
+
+            <!-- 2. Hono Official Flame Logo -->
             <div class="eco-item">
-              <svg class="eco-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/></svg>
+              <svg class="eco-icon" viewBox="0 0 32 32" fill="none">
+                <path d="M16 3C16 3 24 10.5 24 18.5C24 23.2 20.4 27 16 27C11.6 27 8 23.2 8 18.5C8 13.5 13 8 16 3Z" fill="#E36002"/>
+                <path d="M16 11C16 11 20.5 15.5 20.5 20C20.5 22.8 18.5 25 16 25C13.5 25 11.5 22.8 11.5 20C11.5 16.5 14.5 13.5 16 11Z" fill="#FF8A00"/>
+                <path d="M16 16C16 16 18 18.5 18 21C18 22.1 17.1 23 16 23C14.9 23 14 22.1 14 21C14 19.5 15.2 17.5 16 16Z" fill="#FFC83B"/>
+              </svg>
               <span>Hono Routing Engine</span>
             </div>
+
+            <!-- 3. TypeScript Official Logo -->
             <div class="eco-item">
-              <svg class="eco-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M2.5 4v16h19V4H2.5zm16.5 13.5h-2.1v-1.8h2.1v1.8zm0-3.3h-2.1V7.5h2.1v6.7zM11.5 17.5H9.4v-1.8h2.1v1.8zm0-3.3H9.4V7.5h2.1v6.7z"/></svg>
+              <svg class="eco-icon" viewBox="0 0 32 32" fill="currentColor">
+                <path d="M4 4h24v24H4V4zm11.5 14.4h-2.8V23h-2.1v-9.6h7v2h-2.1v9zm4.2 4.8c1.5 0 2.6-.4 3.4-1.2.8-.8 1.2-1.8 1.2-3.1 0-1-.3-1.8-.8-2.3-.6-.6-1.5-1-2.7-1.3-.9-.2-1.5-.4-1.8-.6-.3-.2-.4-.5-.4-.9 0-.4.2-.7.5-.9.3-.2.8-.3 1.3-.3.6 0 1.1.1 1.6.4.5.3.8.7.9 1.3l1.8-.7c-.3-.9-.8-1.6-1.5-2.1-.7-.5-1.7-.8-2.8-.8-1.3 0-2.4.4-3.1 1.1-.7.7-1.1 1.7-1.1 2.8 0 1 .3 1.8.9 2.4.6.6 1.5 1 2.8 1.3.8.2 1.4.4 1.7.6.3.2.4.5.4.9 0 .4-.2.8-.6 1-.4.2-.9.4-1.6.4-.8 0-1.4-.2-2-.6-.5-.4-.8-1-1-1.7l-1.9.6c.3 1.1.9 2 1.7 2.6.9.7 2.1 1 3.5 1z"/>
+              </svg>
               <span>TypeScript 5.x</span>
             </div>
+
+            <!-- 4. Prometheus Official Logo -->
             <div class="eco-item">
-              <svg class="eco-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 14.5h-2v-2h2v2zm0-4h-2V7h2v5.5z"/></svg>
+              <svg class="eco-icon" viewBox="0 0 32 32" fill="currentColor">
+                <path d="M16 4C9.37 4 4 9.37 4 16c0 6.63 5.37 12 12 12s12-5.37 12-12c0-6.63-5.37-12-12-12zm0 2.5c5.25 0 9.5 4.25 9.5 9.5s-4.25 9.5-9.5 9.5-9.5-4.25-9.5-9.5 4.25-9.5 9.5-9.5zm-1 3.5v7h2V10h-2zm-3 8c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1zm6 0c-.55 0-1 .45-1 1s.45 1 1 1 1-.45 1-1-.45-1-1-1z"/>
+              </svg>
               <span>Prometheus Metrics</span>
             </div>
+
+            <!-- 5. Cloudflare Official Logo -->
             <div class="eco-item">
-              <svg class="eco-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              <svg class="eco-icon" viewBox="0 0 32 32" fill="currentColor">
+                <path d="M24.2 13.1c-.5-3.4-3.4-6.1-6.9-6.1-2.9 0-5.5 1.8-6.5 4.5C9.4 11.8 8.1 13 7.3 14.6 5.3 15.3 4 17.2 4 19.5 4 22.5 6.5 25 9.5 25h14.8c2.6 0 4.7-2.1 4.7-4.7 0-2.4-1.8-4.4-4.2-4.7-.2-1-.3-1.8-.6-2.5z"/>
+              </svg>
               <span>Cloudflare & Edge Ready</span>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Circadian & Runtime Mode Showcase (对标 Endel 4 核心交互模式) -->
+      <!-- Circadian & Runtime Mode Showcase (四大核心运行模式) -->
       <section id="modes" class="modes-section">
         <div class="container">
-          <span class="section-eyebrow animate-on-scroll" data-i18n="modes.eyebrow">Architectural States</span>
-          <h2 class="section-title animate-on-scroll" data-i18n="modes.title">Harmonic Runtime Modes</h2>
+          <span class="section-eyebrow animate-on-scroll" data-i18n="modes.eyebrow">架构形态</span>
+          <h2 class="section-title animate-on-scroll" data-i18n="modes.title">四大核心运行模式</h2>
           <p class="section-subtitle animate-on-scroll" data-i18n="modes.subtitle">
-            Switch between dedicated operational modes designed to balance raw performance, flexibility, and frontend developer experience.
+            兼顾极限吞吐性能、中间件解耦与前端开发体验，按需选用最契合的运行形态。
           </p>
 
           <div class="modes-grid">
             <!-- Mode 1 -->
             <article class="mode-card animate-on-scroll" data-mode-card="fast-path" style="--card-glow: rgba(56, 189, 248, 0.2);">
               <div class="mode-card-top">
-                <span class="mode-number" data-i18n="modes.card1.num">01 / SPEED</span>
+                <span class="mode-number" data-i18n="modes.card1.num">01 / 极速直通</span>
                 <h3 class="mode-card-title" data-i18n="modes.card1.title">Kernel Fast-Path</h3>
                 <p class="mode-card-desc" data-i18n="modes.card1.desc">
-                  Sub-millisecond route dispatching built on Bun native primitives and Hono with zero intermediate overhead.
+                  基于 Bun 原生底层与 Hono 高性能路由引擎，微秒级响应分发，零中间冗余开销。
                 </p>
               </div>
               <div class="mode-card-bottom">
                 <div class="mode-pill-action">
-                  <span data-i18n="modes.card1.action">Inspect Kernel</span> <span>→</span>
+                  <span data-i18n="modes.card1.action">查看内核机制</span> <span>→</span>
                 </div>
               </div>
             </article>
@@ -223,15 +282,15 @@
             <!-- Mode 2 -->
             <article class="mode-card animate-on-scroll" data-mode-card="plugin-mesh" style="--card-glow: rgba(244, 114, 182, 0.2);">
               <div class="mode-card-top">
-                <span class="mode-number" data-i18n="modes.card2.num">02 / EXTENSIBILITY</span>
+                <span class="mode-number" data-i18n="modes.card2.num">02 / 插件解耦</span>
                 <h3 class="mode-card-title" data-i18n="modes.card2.title">Plugin Mesh</h3>
                 <p class="mode-card-desc" data-i18n="modes.card2.desc">
-                  Composable lifecycle hooks allow injecting auth guards, caching layers, and rate limiters without polluting core logic.
+                  生命周期钩子驱动，按需接入鉴权、缓存、熔断与限流，核心业务逻辑保持纯粹。
                 </p>
               </div>
               <div class="mode-card-bottom">
                 <div class="mode-pill-action">
-                  <span data-i18n="modes.card2.action">Explore Plugins</span> <span>→</span>
+                  <span data-i18n="modes.card2.action">浏览官方插件</span> <span>→</span>
                 </div>
               </div>
             </article>
@@ -239,15 +298,15 @@
             <!-- Mode 3 -->
             <article class="mode-card animate-on-scroll" data-mode-card="forward" style="--card-glow: rgba(52, 211, 153, 0.2);">
               <div class="mode-card-top">
-                <span class="mode-number" data-i18n="modes.card3.num">03 / RELIABILITY</span>
+                <span class="mode-number" data-i18n="modes.card3.num">03 / 传输可靠</span>
                 <h3 class="mode-card-title" data-i18n="modes.card3.title">Transport Forward</h3>
                 <p class="mode-card-desc" data-i18n="modes.card3.desc">
-                  Upstream proxying with transport-aware strategies, zero-copy streaming, timeout interception, and automatic retries.
+                  传输感知转发层，支持零拷贝流式代理、自适应超时控制与微服务故障重试策略。
                 </p>
               </div>
               <div class="mode-card-bottom">
                 <div class="mode-pill-action">
-                  <span data-i18n="modes.card3.action">View Forward Rules</span> <span>→</span>
+                  <span data-i18n="modes.card3.action">转发规则配置</span> <span>→</span>
                 </div>
               </div>
             </article>
@@ -255,15 +314,15 @@
             <!-- Mode 4 -->
             <article class="mode-card animate-on-scroll" data-mode-card="minimal" style="--card-glow: rgba(168, 85, 247, 0.2);">
               <div class="mode-card-top">
-                <span class="mode-number" data-i18n="modes.card4.num">04 / SIMPLICITY</span>
+                <span class="mode-number" data-i18n="modes.card4.num">04 / 前端自治</span>
                 <h3 class="mode-card-title" data-i18n="modes.card4.title">Frontend-Owned</h3>
                 <p class="mode-card-desc" data-i18n="modes.card4.desc">
-                  No heavy controller hierarchies or enterprise gateway ceremony. Pure TypeScript configuration tailored for UI teams.
+                  摆脱传统后端冗长的控制器与繁复配置，纯 TypeScript 驱动，前端团队轻松闭环。
                 </p>
               </div>
               <div class="mode-card-bottom">
                 <div class="mode-pill-action">
-                  <span data-i18n="modes.card4.action">See Examples</span> <span>→</span>
+                  <span data-i18n="modes.card4.action">快速上手示例</span> <span>→</span>
                 </div>
               </div>
             </article>
@@ -271,13 +330,13 @@
         </div>
       </section>
 
-      <!-- Backed by Benchmarks & Performance (对标 Endel Backed by Neuroscience) -->
+      <!-- Backed by Benchmarks & Performance -->
       <section id="benchmarks" class="benchmarks-section">
         <div class="container">
-          <span class="section-eyebrow animate-on-scroll" data-i18n="benchmarks.eyebrow">Backed by Benchmarks</span>
-          <h2 class="section-title animate-on-scroll" data-i18n="benchmarks.title">Engineered for Radical Performance</h2>
+          <span class="section-eyebrow animate-on-scroll" data-i18n="benchmarks.eyebrow">实测性能基准</span>
+          <h2 class="section-title animate-on-scroll" data-i18n="benchmarks.title">以极致指标，重构微网关性能边界</h2>
           <p class="section-subtitle animate-on-scroll" data-i18n="benchmarks.subtitle">
-            By stripping away bloated legacy runtime layers, Humming achieves ultra-fast response times and minimal server resource consumption.
+            剥离传统框架冗余层，在高并发流量下依然保持微秒级响应与超低资源消耗。
           </p>
 
           <div class="benchmarks-grid">
@@ -291,8 +350,8 @@
                 </svg>
               </div>
               <div class="stat-metric cyan" data-i18n="benchmarks.stat1.val">7.2x</div>
-              <div class="stat-label" data-i18n="benchmarks.stat1.title">Higher Throughput</div>
-              <div class="stat-subtext" data-i18n="benchmarks.stat1.sub">vs standard Express/Node.js BFF gateways on equal CPU cores.</div>
+              <div class="stat-label" data-i18n="benchmarks.stat1.title">吞吐性能大幅跃升</div>
+              <div class="stat-subtext" data-i18n="benchmarks.stat1.sub">同等 CPU 规格下，并发吞吐量远超传统 Node.js / Express 网关。</div>
             </div>
 
             <!-- Stat 2 -->
@@ -305,8 +364,8 @@
                 </svg>
               </div>
               <div class="stat-metric emerald" data-i18n="benchmarks.stat2.val">&lt;0.6ms</div>
-              <div class="stat-label" data-i18n="benchmarks.stat2.title">Proxy Overhead</div>
-              <div class="stat-subtext" data-i18n="benchmarks.stat2.sub">Ultra-low hop latency between client and upstream microservices.</div>
+              <div class="stat-label" data-i18n="benchmarks.stat2.title">极致转发低延迟</div>
+              <div class="stat-subtext" data-i18n="benchmarks.stat2.sub">客户端到上游微服务的透明代理转发耗时不足 0.6 毫秒。</div>
             </div>
 
             <!-- Stat 3 -->
@@ -318,8 +377,8 @@
                 </svg>
               </div>
               <div class="stat-metric" data-i18n="benchmarks.stat3.val">16MB</div>
-              <div class="stat-label" data-i18n="benchmarks.stat3.title">Base Memory</div>
-              <div class="stat-subtext" data-i18n="benchmarks.stat3.sub">Idle footprint allows scaling hundreds of isolated edge instances.</div>
+              <div class="stat-label" data-i18n="benchmarks.stat3.title">超低常驻内存占用</div>
+              <div class="stat-subtext" data-i18n="benchmarks.stat3.sub">极度精简的空闲内存占用，单机轻松弹性支撑数百个独立实例。</div>
             </div>
 
             <!-- Stat 4 -->
@@ -331,8 +390,8 @@
                 </svg>
               </div>
               <div class="stat-metric" data-i18n="benchmarks.stat4.val">100%</div>
-              <div class="stat-label" data-i18n="benchmarks.stat4.title">TypeScript Native</div>
-              <div class="stat-subtext" data-i18n="benchmarks.stat4.sub">Zero compile step required with Bun first-class execution.</div>
+              <div class="stat-label" data-i18n="benchmarks.stat4.title">TypeScript 原生直跑</div>
+              <div class="stat-subtext" data-i18n="benchmarks.stat4.sub">原生支持 TypeScript，无需任何构建配置与打包转译，即写即跑。</div>
             </div>
           </div>
         </div>
@@ -344,25 +403,39 @@
           <div class="pipeline-box animate-on-scroll">
             <div class="pipeline-toolbar">
               <div>
-                <span class="section-eyebrow" data-i18n="pipeline.eyebrow">Interactive Flow</span>
-                <h3 style="font-size:1.6rem; font-weight:700; color:var(--text-primary);" data-i18n="pipeline.title">Live Pipeline Visualizer</h3>
+                <span class="section-eyebrow" data-i18n="pipeline.eyebrow">流程演练</span>
+                <h3 style="font-size:1.6rem; font-weight:700; color:var(--text-primary);" data-i18n="pipeline.title">实时请求链路可视化</h3>
                 <p style="font-size:0.9rem; color:var(--text-muted); margin-top:4px;" data-i18n="pipeline.subtitle">
-                  Trigger simulated requests to watch packets propagate through middleware hooks, kernel routing, and upstream dispatch.
+                  触发模拟请求，直观观察数据包在中间件钩子、内核路由与上游微服务间的流转轨迹。
                 </p>
               </div>
 
               <div class="pipeline-controls">
-                <div class="route-select-wrapper">
-                  <select id="pipeline-route-select" aria-label="Select target route">
-                    <option value="/api/options?keys=teams">GET /api/options?keys=teams</option>
-                    <option value="/api/protected/user">GET /api/protected/user (Auth)</option>
-                    <option value="/forward/catalog">POST /forward/catalog (Proxy)</option>
-                    <option value="/health">GET /health (Built-in)</option>
-                  </select>
+                <div class="pipeline-route-chips" role="tablist">
+                  <button type="button" class="route-chip is-active" data-route="/health" role="tab" aria-selected="true">
+                    <span class="method-tag method-get">GET</span>
+                    <span class="route-path">/health</span>
+                    <span class="chip-tag">Built-in</span>
+                  </button>
+                  <button type="button" class="route-chip" data-route="/api/options?keys=teams" role="tab" aria-selected="false">
+                    <span class="method-tag method-get">GET</span>
+                    <span class="route-path">/api/options</span>
+                    <span class="chip-tag">Data</span>
+                  </button>
+                  <button type="button" class="route-chip" data-route="/api/protected/user" role="tab" aria-selected="false">
+                    <span class="method-tag method-get">GET</span>
+                    <span class="route-path">/api/protected/user</span>
+                    <span class="chip-tag">Auth</span>
+                  </button>
+                  <button type="button" class="route-chip" data-route="/forward/catalog" role="tab" aria-selected="false">
+                    <span class="method-tag method-post">POST</span>
+                    <span class="route-path">/forward/catalog</span>
+                    <span class="chip-tag">Proxy</span>
+                  </button>
                 </div>
                 <button type="button" class="btn-pulse-trigger" id="pipeline-trigger-btn">
                   <span>⚡</span>
-                  <span data-i18n="pipeline.send">Fire Request</span>
+                  <span data-i18n="pipeline.send">触发请求</span>
                 </button>
               </div>
             </div>
@@ -371,7 +444,7 @@
             <div class="pipeline-nodes-flow">
               <div class="flow-node" id="node-client">
                 <span class="flow-node-icon">📱</span>
-                <div class="flow-node-title" data-i18n="pipeline.nodeClient">Client Request</div>
+                <div class="flow-node-title" data-i18n="pipeline.nodeClient">客户端请求</div>
                 <div class="flow-node-desc" data-i18n="pipeline.nodeClientSub">HTTP / WebSocket</div>
               </div>
 
@@ -379,32 +452,32 @@
 
               <div class="flow-node" id="node-plugin">
                 <span class="flow-node-icon">🛡️</span>
-                <div class="flow-node-title" data-i18n="pipeline.nodePlugin">Plugin Hook</div>
-                <div class="flow-node-desc" data-i18n="pipeline.nodePluginSub">Auth & RateLimit</div>
+                <div class="flow-node-title" data-i18n="pipeline.nodePlugin">插件钩子拦截</div>
+                <div class="flow-node-desc" data-i18n="pipeline.nodePluginSub">鉴权与限流</div>
               </div>
 
               <div class="flow-connector" id="conn-2"></div>
 
               <div class="flow-node" id="node-core">
                 <span class="flow-node-icon">⚡</span>
-                <div class="flow-node-title" data-i18n="pipeline.nodeCore">Humming Kernel</div>
-                <div class="flow-node-desc" data-i18n="pipeline.nodeCoreSub">Route Matching</div>
+                <div class="flow-node-title" data-i18n="pipeline.nodeCore">Humming 内核</div>
+                <div class="flow-node-desc" data-i18n="pipeline.nodeCoreSub">精确路由匹配</div>
               </div>
 
               <div class="flow-connector" id="conn-3"></div>
 
               <div class="flow-node" id="node-upstream">
                 <span class="flow-node-icon">☁️</span>
-                <div class="flow-node-title" data-i18n="pipeline.nodeUpstream">Upstream Service</div>
-                <div class="flow-node-desc" data-i18n="pipeline.nodeUpstreamSub">gRPC / REST API</div>
+                <div class="flow-node-title" data-i18n="pipeline.nodeUpstream">上游微服务</div>
+                <div class="flow-node-desc" data-i18n="pipeline.nodeUpstreamSub">REST / gRPC</div>
               </div>
 
               <div class="flow-connector" id="conn-4"></div>
 
               <div class="flow-node" id="node-res">
                 <span class="flow-node-icon">✨</span>
-                <div class="flow-node-title" data-i18n="pipeline.nodeRes">Response Morph</div>
-                <div class="flow-node-desc" data-i18n="pipeline.nodeResSub">Transformed Body</div>
+                <div class="flow-node-title" data-i18n="pipeline.nodeRes">响应重塑</div>
+                <div class="flow-node-desc" data-i18n="pipeline.nodeResSub">数据裁剪与转换</div>
               </div>
             </div>
 
@@ -419,10 +492,10 @@
       <!-- Official Plugin Matrix -->
       <section id="plugins" class="plugins-section">
         <div class="container">
-          <span class="section-eyebrow animate-on-scroll" data-i18n="plugins.eyebrow">Ecosystem</span>
-          <h2 class="section-title animate-on-scroll" data-i18n="plugins.title">Official Plugin Matrix</h2>
+          <span class="section-eyebrow animate-on-scroll" data-i18n="plugins.eyebrow">官方插件</span>
+          <h2 class="section-title animate-on-scroll" data-i18n="plugins.title">开箱即用的插件矩阵</h2>
           <p class="section-subtitle animate-on-scroll" data-i18n="plugins.subtitle">
-            Modular, tree-shakeable official plugins designed for instant plug-and-play integration.
+            模块化、可摇树优化的官方插件，一行代码即插即用。
           </p>
 
           <div class="plugins-grid">
@@ -522,15 +595,15 @@
         <div class="container">
           <div class="cli-wrapper">
             <div class="cli-info-box animate-on-scroll">
-              <span class="section-eyebrow" data-i18n="cli.eyebrow">Developer Experience</span>
-              <h2 data-i18n="cli.title">From Zero to BFF in Seconds</h2>
+              <span class="section-eyebrow" data-i18n="cli.eyebrow">开发体验</span>
+              <h2 data-i18n="cli.title">秒级初始化全新 BFF 工程</h2>
               <p data-i18n="cli.subtitle">
-                The included Bun CLI scaffolds starter templates, registers plugins, and manages production builds with zero hassle.
+                内置 Bun 原生 CLI，提供交互式模板脚手架、官方插件预设与生产镜像构建。
               </p>
               <ul class="cli-features-list">
-                <li><span class="cli-check-icon">✓</span> <span data-i18n="cli.f1">Interactive template generator with official plugins pre-wired</span></li>
-                <li><span class="cli-check-icon">✓</span> <span data-i18n="cli.f2">Single-command dev server with instant TypeScript hot-reload</span></li>
-                <li><span class="cli-check-icon">✓</span> <span data-i18n="cli.f3">Multi-platform Docker containerization ready out of the box</span></li>
+                <li><span class="cli-check-icon">✓</span> <span data-i18n="cli.f1">交互式模板生成器，开箱预置常用官方插件</span></li>
+                <li><span class="cli-check-icon">✓</span> <span data-i18n="cli.f2">单行命令启动开发服务器，享受毫秒级 TypeScript 热重载</span></li>
+                <li><span class="cli-check-icon">✓</span> <span data-i18n="cli.f3">开箱即用的轻量级 Docker 多架构容器化配置</span></li>
               </ul>
             </div>
 
@@ -581,16 +654,16 @@
           </div>
 
           <div class="footer-links">
-            <a href="./docs/index.html" data-i18n="footer.docs">Documentation</a>
-            <a href="https://github.com/vinono/humming" target="_blank" rel="noopener noreferrer" data-i18n="footer.github">GitHub</a>
-            <a href="https://github.com/vinono/humming/releases" target="_blank" rel="noopener noreferrer" data-i18n="footer.releases">Releases</a>
-            <a href="./LICENSE-MIT" data-i18n="footer.license">MIT / Apache-2.0</a>
+            <a href="./docs/index.html" data-i18n="footer.docs">开发文档</a>
+            <a href="https://github.com/vinono/humming" target="_blank" rel="noopener noreferrer" data-i18n="footer.github">GitHub 仓库</a>
+            <a href="https://github.com/vinono/humming/releases" target="_blank" rel="noopener noreferrer" data-i18n="footer.releases">版本发布</a>
+            <a href="./LICENSE-MIT" data-i18n="footer.license">MIT / Apache-2.0 开源协议</a>
           </div>
         </div>
 
         <div class="footer-bottom">
-          <div data-i18n="footer.desc">Humming is an open-source lightweight BFF core for Bun.</div>
-          <div data-i18n="footer.allRights">Crafted for high-performance frontend teams.</div>
+          <div data-i18n="footer.desc">Humming 是专为 Bun 打造的开源轻量级插件化 BFF 核心。</div>
+          <div data-i18n="footer.allRights">为追求极致性能的前端团队倾力打造。</div>
         </div>
       </div>
     </footer>

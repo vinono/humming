@@ -3,10 +3,10 @@
 document.addEventListener('DOMContentLoaded', () => {
   initScrollAnimations();
   initCliCopy();
+  initCodePlayground();
   initModeSwitcher();
   initPipelineSimulator();
   initTerminalTabs();
-  initTelemetryCounters();
 });
 
 // Scroll Animations
@@ -58,46 +58,128 @@ function initCliCopy() {
   });
 }
 
-// Mode Switcher synchronization (Hero Player & Mode Cards)
-function initModeSwitcher() {
-  const modeCards = document.querySelectorAll('.mode-card');
-  const modeTags = document.querySelectorAll('.mode-tag');
+// Interactive Code Playground (Hero Option A)
+function initCodePlayground() {
+  const tabs = document.querySelectorAll('.pg-tab');
+  const codeDisplay = document.getElementById('pg-code-display');
+  const reqPathDisplay = document.getElementById('pg-req-path');
+  const responseJsonDisplay = document.getElementById('pg-response-json');
+  const runBtn = document.getElementById('btn-pg-run');
+  const latencyStat = document.getElementById('pg-latency-stat');
 
-  function activateMode(mode) {
-    // Update Soundscape instance if present
-    if (window.soundscapeInstance) {
-      window.soundscapeInstance.setMode(mode);
-      window.soundscapeInstance.pulseWave(1.8);
-    }
+  if (!tabs.length || !codeDisplay) return;
 
-    modeCards.forEach((c) => {
-      if (c.getAttribute('data-mode-card') === mode) {
-        c.classList.add('is-active');
-      } else {
-        c.classList.remove('is-active');
-      }
-    });
+  const presets = {
+    fast: {
+      code: `<span class="token-keyword">import</span> { createApp } <span class="token-keyword">from</span> <span class="token-string">'humming'</span>;
 
-    modeTags.forEach((t) => {
-      if (t.getAttribute('data-sound-mode') === mode) {
-        t.classList.add('is-active');
-      } else {
-        t.classList.remove('is-active');
-      }
-    });
+<span class="token-keyword">const</span> app = <span class="token-func">createApp</span>({
+  port: <span class="token-number">8788</span>,
+  routes: {
+    <span class="token-string">'/health'</span>: () => ({ status: <span class="token-string">'ok'</span>, uptime: process.<span class="token-func">uptime</span>() }),
+    <span class="token-string">'/api/options'</span>: { teams: [<span class="token-string">'Core'</span>, <span class="token-string">'Platform'</span>, <span class="token-string">'UI'</span>] }
   }
+});
 
-  modeCards.forEach((card) => {
-    card.addEventListener('click', () => {
-      const mode = card.getAttribute('data-mode-card');
-      if (mode) activateMode(mode);
+app.<span class="token-func">listen</span>();`,
+      path: 'http://localhost:8788/health',
+      json: `<span class="json-brace">{</span>
+  <span class="json-key">"status"</span>: <span class="json-str">"healthy"</span>,
+  <span class="json-key">"runtime"</span>: <span class="json-str">"bun-1.3.11"</span>,
+  <span class="json-key">"uptime"</span>: <span class="json-num">14.28</span>,
+  <span class="json-key">"proxy_overhead"</span>: <span class="json-str">"&lt; 0.4ms"</span>,
+  <span class="json-key">"zero_copy"</span>: <span class="json-bool">true</span>
+<span class="json-brace">}</span>`
+    },
+    plugins: {
+      code: `<span class="token-keyword">import</span> { createApp } <span class="token-keyword">from</span> <span class="token-string">'humming'</span>;
+<span class="token-keyword">import</span> { authPlugin } <span class="token-keyword">from</span> <span class="token-string">'@humming/auth'</span>;
+<span class="token-keyword">import</span> { cachePlugin } <span class="token-keyword">from</span> <span class="token-string">'@humming/cache'</span>;
+
+<span class="token-keyword">const</span> app = <span class="token-func">createApp</span>()
+  .<span class="token-func">use</span>(<span class="token-func">authPlugin</span>({ jwksUri: <span class="token-string">'https://auth.company.io/jwks'</span> }))
+  .<span class="token-func">use</span>(<span class="token-func">cachePlugin</span>({ ttl: <span class="token-number">60</span>, redis: process.env.REDIS_URL }));
+
+app.<span class="token-func">listen</span>(<span class="token-number">8788</span>);`,
+      path: 'http://localhost:8788/api/user/profile',
+      json: `<span class="json-brace">{</span>
+  <span class="json-key">"auth"</span>: <span class="json-str">"verified"</span>,
+  <span class="json-key">"claims"</span>: <span class="json-brace">{</span> <span class="json-key">"sub"</span>: <span class="json-str">"user_9842"</span>, <span class="json-key">"role"</span>: <span class="json-str">"engineer"</span> <span class="json-brace">}</span>,
+  <span class="json-key">"cache_hit"</span>: <span class="json-bool">true</span>,
+  <span class="json-key">"cache_ttl_remaining"</span>: <span class="json-num">58</span>
+<span class="json-brace">}</span>`
+    },
+    forward: {
+      code: `<span class="token-keyword">import</span> { createApp } <span class="token-keyword">from</span> <span class="token-string">'humming'</span>;
+
+<span class="token-keyword">const</span> app = <span class="token-func">createApp</span>({
+  forward: {
+    <span class="token-string">'/api/v1/*'</span>: {
+      target: <span class="token-string">'https://upstream-cluster.internal'</span>,
+      timeout: <span class="token-number">1500</span>,
+      retries: <span class="token-number">2</span>,
+      headers: { <span class="token-string">'x-bff-version'</span>: <span class="token-string">'0.1.0'</span> }
+    }
+  }
+});
+
+app.<span class="token-func">listen</span>(<span class="token-number">8788</span>);`,
+      path: 'http://localhost:8788/api/v1/stream/orders',
+      json: `<span class="json-brace">{</span>
+  <span class="json-key">"upstream_status"</span>: <span class="json-num">200</span>,
+  <span class="json-key">"transport"</span>: <span class="json-str">"zero-copy-stream"</span>,
+  <span class="json-key">"stream_bytes"</span>: <span class="json-num">482910</span>,
+  <span class="json-key">"retry_attempts"</span>: <span class="json-num">0</span>
+<span class="json-brace">}</span>`
+    }
+  };
+
+  let activeTabKey = 'fast';
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const tabKey = tab.getAttribute('data-pg-tab');
+      if (!presets[tabKey]) return;
+
+      tabs.forEach((t) => t.classList.remove('is-active'));
+      tab.classList.add('is-active');
+      activeTabKey = tabKey;
+
+      codeDisplay.innerHTML = presets[tabKey].code;
+      reqPathDisplay.textContent = presets[tabKey].path;
+      responseJsonDisplay.innerHTML = presets[tabKey].json;
+
+      // Pulse animation
+      triggerResponsePulse();
     });
   });
 
-  modeTags.forEach((tag) => {
-    tag.addEventListener('click', () => {
-      const mode = tag.getAttribute('data-sound-mode');
-      if (mode) activateMode(mode);
+  function triggerResponsePulse() {
+    responseJsonDisplay.style.opacity = '0.3';
+    setTimeout(() => {
+      responseJsonDisplay.style.opacity = '1';
+      const randomLatency = (0.32 + Math.random() * 0.15).toFixed(2);
+      if (latencyStat) latencyStat.textContent = `${randomLatency} ms`;
+    }, 150);
+  }
+
+  if (runBtn) {
+    runBtn.addEventListener('click', () => {
+      runBtn.style.transform = 'scale(0.95)';
+      setTimeout(() => (runBtn.style.transform = ''), 150);
+      triggerResponsePulse();
+    });
+  }
+}
+
+// Mode Switcher synchronization (Mode Cards)
+function initModeSwitcher() {
+  const modeCards = document.querySelectorAll('.mode-card');
+
+  modeCards.forEach((card) => {
+    card.addEventListener('click', () => {
+      modeCards.forEach((c) => c.classList.remove('is-active'));
+      card.classList.add('is-active');
     });
   });
 }
@@ -105,7 +187,7 @@ function initModeSwitcher() {
 // Live Request Pipeline Simulator
 function initPipelineSimulator() {
   const triggerBtn = document.getElementById('pipeline-trigger-btn');
-  const routeSelect = document.getElementById('pipeline-route-select');
+  const routeChips = document.querySelectorAll('.route-chip');
   const consoleBox = document.getElementById('pipeline-terminal-box');
 
   const nodeClient = document.getElementById('node-client');
@@ -120,6 +202,20 @@ function initPipelineSimulator() {
   const conn4 = document.getElementById('conn-4');
 
   if (!triggerBtn || !consoleBox) return;
+
+  let currentRoute = '/health';
+
+  routeChips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      routeChips.forEach((c) => {
+        c.classList.remove('is-active');
+        c.setAttribute('aria-selected', 'false');
+      });
+      chip.classList.add('is-active');
+      chip.setAttribute('aria-selected', 'true');
+      currentRoute = chip.getAttribute('data-route') || '/health';
+    });
+  });
 
   function appendLog(type, message) {
     const p = document.createElement('div');
@@ -138,12 +234,7 @@ function initPipelineSimulator() {
     triggerBtn.disabled = true;
     triggerBtn.style.opacity = '0.6';
 
-    const selectedRoute = routeSelect ? routeSelect.value : '/api/options?keys=teams';
-    appendLog('req', `➔ INCOMING: GET ${selectedRoute} (HTTP/2 via Bun runtime)`);
-
-    if (window.soundscapeInstance) {
-      window.soundscapeInstance.pulseWave(2.2);
-    }
+    appendLog('req', `➔ INCOMING: ${currentRoute.startsWith('/forward') ? 'POST' : 'GET'} ${currentRoute} (HTTP/2 via Bun runtime)`);
 
     // Step 1: Client Node
     nodeClient.classList.add('is-active');
@@ -237,17 +328,4 @@ function initTerminalTabs() {
       }
     });
   });
-}
-
-// Telemetry Simulated Subtle Variation
-function initTelemetryCounters() {
-  const rpsVal = document.getElementById('telemetry-rps-val');
-  if (!rpsVal) return;
-
-  setInterval(() => {
-    const base = 182400;
-    const variation = Math.floor((Math.random() - 0.5) * 3200);
-    const formatted = (base + variation).toLocaleString();
-    rpsVal.textContent = `${formatted} req/s`;
-  }, 2400);
 }

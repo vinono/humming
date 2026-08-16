@@ -1,4 +1,4 @@
-import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readFile, rm, writeFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 
 type PackageJson = {
@@ -23,9 +23,21 @@ async function main() {
   await cp(path.join(rootDir, 'site'), path.join(outDir, 'site'), {
     recursive: true,
   });
+  await cp(path.join(rootDir, 'docs'), path.join(outDir, 'docs'), {
+    recursive: true,
+  });
+
+  // Copy root markdown files for reader support
+  const rootFiles = await readdir(rootDir);
+  for (const file of rootFiles) {
+    if (file.endsWith('.md')) {
+      await cp(path.join(rootDir, file), path.join(outDir, file));
+    }
+  }
 
   const rootHtml = await readFile(path.join(rootDir, 'index.html'), 'utf8');
   const docsHtml = await readFile(path.join(rootDir, 'docs', 'index.html'), 'utf8');
+  const viewHtml = await readFile(path.join(rootDir, 'docs', 'view.html'), 'utf8');
 
   const builtRootHtml = rewriteMarkdownLinks(rootHtml, 'index.html', repoUrl);
   const builtDocsHtml = rewriteMarkdownLinks(
@@ -33,10 +45,16 @@ async function main() {
     'docs/index.html',
     repoUrl,
   );
+  const builtViewHtml = rewriteMarkdownLinks(
+    viewHtml,
+    'docs/view.html',
+    repoUrl,
+  );
 
   await writeFile(path.join(outDir, 'index.html'), builtRootHtml);
   await writeFile(path.join(outDir, '404.html'), builtRootHtml);
   await writeFile(path.join(outDir, 'docs', 'index.html'), builtDocsHtml);
+  await writeFile(path.join(outDir, 'docs', 'view.html'), builtViewHtml);
   await writeFile(path.join(outDir, '.nojekyll'), '');
 }
 
